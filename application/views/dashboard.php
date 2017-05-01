@@ -23,14 +23,14 @@
                                         150
                                     </h3>
                                     <p>
-                                        New Orders
+                                        Permintaan
                                     </p>
                                 </div>
                                 <div class="icon">
                                     <i class="ion ion-bag"></i>
                                 </div>
                                 <a href="#" class="small-box-footer">
-                                    More info <i class="fa fa-arrow-circle-right"></i>
+                                    Selengkapnya <i class="fa fa-arrow-circle-right"></i>
                                 </a>
                             </div>
                         </div><!-- ./col -->
@@ -96,7 +96,7 @@
                     <!-- top row -->
                     <div class="row">
                         <div class="col-xs-12 connectedSortable">
-                            
+
                         </div><!-- /.col -->
                     </div>
                     <!-- /.row -->
@@ -104,7 +104,7 @@
                     <!-- Main row -->
                     <div class="row">
                         <!-- Left col -->
-                        <section class="col-lg-6 connectedSortable"> 
+                        <section class="col-lg-6 connectedSortable">
                             <!-- Box (with bar chart) -->
                             <div class="box box-danger" id="loading-example">
                                 <div class="box-header">
@@ -182,8 +182,8 @@
                                         </div><!-- ./col -->
                                     </div><!-- /.row -->
                                 </div><!-- /.box-footer -->
-                            </div><!-- /.box -->        
-                            
+                            </div><!-- /.box -->
+
                             <!-- Custom tabs (Charts with tabs)-->
                             <div class="nav-tabs-custom">
                                 <!-- Tabs within a box -->
@@ -198,13 +198,13 @@
                                     <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;"></div>
                                 </div>
                             </div><!-- /.nav-tabs-custom -->
-                                                
+
                             <!-- Calendar -->
                             <div class="box box-warning">
                                 <div class="box-header">
                                     <i class="fa fa-calendar"></i>
                                     <div class="box-title">Calendar</div>
-                                    
+
                                     <!-- tools box -->
                                     <div class="pull-right box-tools">
                                         <!-- button with a dropdown -->
@@ -217,7 +217,7 @@
                                                 <li><a href="#">View calendar</a></li>
                                             </ul>
                                         </div>
-                                    </div><!-- /. tools -->                                    
+                                    </div><!-- /. tools -->
                                 </div><!-- /.box-header -->
                                 <div class="box-body no-padding">
                                     <!--The calendar -->
@@ -260,7 +260,7 @@
                             <div class="box box-primary">
                                 <div class="box-header">
                                     <!-- tools box -->
-                                    <div class="pull-right box-tools">                                        
+                                    <div class="pull-right box-tools">
                                         <button class="btn btn-primary btn-sm daterange pull-right" data-toggle="tooltip" title="Date range"><i class="fa fa-calendar"></i></button>
                                         <button class="btn btn-primary btn-sm pull-right" data-widget='collapse' data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-minus"></i></button>
                                     </div><!-- /. tools -->
@@ -333,7 +333,7 @@
                                     <h3 class="box-title"><i class="fa fa-comments-o"></i> Chat</h3>
                                     <div class="box-tools pull-right" data-toggle="tooltip" title="Status">
                                         <div class="btn-group" data-toggle="btn-toggle" >
-                                            <button type="button" class="btn btn-default btn-sm active"><i class="fa fa-square text-green"></i></button>                                            
+                                            <button type="button" class="btn btn-default btn-sm active"><i class="fa fa-square text-green"></i></button>
                                             <button type="button" class="btn btn-default btn-sm"><i class="fa fa-square text-red"></i></button>
                                         </div>
                                     </div>
@@ -420,9 +420,9 @@
                                             <span class="handle">
                                                 <i class="fa fa-ellipsis-v"></i>
                                                 <i class="fa fa-ellipsis-v"></i>
-                                            </span>  
+                                            </span>
                                             <!-- checkbox -->
-                                            <input type="checkbox" value="" name=""/>                                            
+                                            <input type="checkbox" value="" name=""/>
                                             <!-- todo text -->
                                             <span class="text">Design a nice theme</span>
                                             <!-- Emphasis label -->
@@ -437,7 +437,7 @@
                                             <span class="handle">
                                                 <i class="fa fa-ellipsis-v"></i>
                                                 <i class="fa fa-ellipsis-v"></i>
-                                            </span>                                            
+                                            </span>
                                             <input type="checkbox" value="" name=""/>
                                             <span class="text">Make the theme responsive</span>
                                             <small class="label label-info"><i class="fa fa-clock-o"></i> 4 hours</small>
@@ -509,6 +509,3 @@
                     </div><!-- /.row (main row) -->
 
                 </section><!-- /.content -->
-            
-
-       
