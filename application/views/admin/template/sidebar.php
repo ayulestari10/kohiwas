@@ -49,7 +49,7 @@
                 </a>
                 <ul class="treeview-menu">
                     <li><a href="pages/forms/general.html"><i class="fa fa-angle-double-right"></i> Daftar Unit</a></li>
-                    <li><a href="pages/forms/advanced.html"><i class="fa fa-angle-double-right"></i> Daftar Operator Unit</a></li>
+                    <li><a href="<?=base_url('admin/daftar_operator')?>"><i class="fa fa-angle-double-right"></i> Daftar Operator Unit</a></li>
                 </ul>
             </li>
         </ul>

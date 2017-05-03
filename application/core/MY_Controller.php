@@ -2,7 +2,7 @@
 
 class MY_Controller extends CI_Controller
 {
-  public $title = 'Puding Lab';
+  public $title = 'PDAM Tirta Randik';
 	public function __construct()
 	{
 		parent::__construct();
@@ -15,7 +15,7 @@ class MY_Controller extends CI_Controller
       return $this->load->view('admin/template/layout', $data);
     }
     elseif ($template == 'operator') {
-      return $this->load->view('operator_unit/template/layout', $data); 
+      return $this->load->view('operator_unit/template/layout', $data);
     }
 	}
 
