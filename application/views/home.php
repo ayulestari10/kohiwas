@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Tirta Randik</title>
 	<link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/bootstrap.min.css') ?>">
+	<script type="text/javascript" src="<?= base_url('assets/js/jquery.js') ?>"></script>
 	<script type="text/javascript" src="<?= base_url('assets/js/bootstrap.min.js') ?>"></script>
 	<style type="text/css">
 		body{
@@ -151,7 +152,8 @@
 						<div class="panel-body">
 							<div class="row">
 								<div class="col-lg-12">
-									<form id="login-form" action="" method="post" role="form" style="display: block;">
+									<?= form_open('login', ['id' => 'login-form', 'role' => 'form', 'style' => 'display: block;']) ?>
+									<!-- <form id="login-form" action="" method="post" role="form" style="display: block;"> -->
 										<div class="form-group">
 											<input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">
 										</div>
@@ -178,7 +180,7 @@
 												</div>
 											</div>
 										</div>
-									</form>
+									<?= form_close() ?>
 									<form id="register-form" action="http://phpoll.com/register/process" method="post" role="form" style="display: none;">
 										<div class="form-group">
 											<input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">

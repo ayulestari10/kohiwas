@@ -7,16 +7,17 @@ class MY_Controller extends CI_Controller
 	{
 		parent::__construct();
 		// $this->load->library('lib_log');
+		date_default_timezone_set("Asia/Jakarta");
 	}
 
 	public function template($data, $template = 'admin')
 	{
-    if ($template == 'admin') {
-      return $this->load->view('admin/template/layout', $data);
-    }
-    elseif ($template == 'operator') {
-      return $this->load->view('operator_unit/template/layout', $data);
-    }
+	    if ($template == 'admin') {
+	      return $this->load->view('admin/template/layout', $data);
+	    }
+	    elseif ($template == 'operator') {
+	      return $this->load->view('operator_unit/template/layout', $data);
+	    }
 	}
 
 	public function POST($name)

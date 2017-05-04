@@ -8,6 +8,12 @@ class Admin extends MY_Controller
   public function __construct()
   {
     parent::__construct();
+    $this->data['id_role'] = $this->session->userdata('id_role');
+    if (!isset($this->data['id_role']))
+    {
+      redirect('login');
+      exit;
+    }
   }
 
   public function index()
