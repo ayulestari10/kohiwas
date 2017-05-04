@@ -42,13 +42,13 @@
                                         53 <!-- <sup style="font-size: 20px">%</sup> -->
                                     </h3>
                                     <p>
-                                        Suplier
+                                        Supplier
                                     </p>
                                 </div>
                                 <div class="icon">
                                     <i class="ion ion-person-add"></i>
                                 </div>
-                                <a href="#" class="small-box-footer">
+                                <a href="<?= base_url('admin/supplier') ?>" class="small-box-footer">
                                     Selengkapnya <i class="fa fa-arrow-circle-right"></i>
                                 </a>
                             </div>

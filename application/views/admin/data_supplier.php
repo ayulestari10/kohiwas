@@ -19,6 +19,7 @@
                         <!-- <h3 class="box-title">Data Supplier</h3>   -->
                     </div><!-- /.box-header -->
                     <div class="box-body table-responsive">
+                        <?= $this->session->flashdata('msg') ?>
                         <table class="table table-striped">
                             <tr>
                                 <th>No</th>
@@ -26,15 +27,17 @@
                                 <th>Alamat</th>
                                 <th width="150"></th>
                             </tr>
+                            <?php $i = 0; foreach ($supplier as $row): ?>
                             <tr>
-                                <td>1</td>
-                                <td>aa</td>
-                                <td>aa</td>
+                                <td><?= ++$i ?></td>
+                                <td><?= $row->nama_suplier ?></td>
+                                <td><?= $row->alamat ?></td>
                                 <td>
-                                    <button class="btn btn-info" data-toggle="modal" data-target="#editSupplier"><i class="fa fa-pencil"></i></button>
-                                    <button class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+                                    <button class="btn btn-info" data-toggle="modal" data-target="#editSupplier" onclick="get_supplier(<?= $row->id_suplier ?>)"><i class="fa fa-pencil"></i></button>
+                                    <button class="btn btn-danger" onclick="delete_supplier(<?= $row->id_suplier ?>)"><i class="fa fa-trash-o"></i></button>
                                 </td>
                             </tr>
+                            <?php endforeach; ?>
                         </table>
                     </div>
                 </div>
@@ -45,27 +48,27 @@
     <div class="modal fade" tabindex="-1" role="dialog" id="addSupplier">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
+        <?= form_open('admin/supplier') ?>
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">Tambah Data Supplier</h4>
           </div>
           <div class="modal-body">
-            <form>
                 <div class="form-group">
                     <label for="Nama">Nama *</label>
-                    <input type="text" class="form-control" name="" required>
+                    <input type="text" class="form-control" name="nama_suplier" required>
                 </div>
                 <div class="form-group">
                     <label for="Alamat">Alamat *</label>
-                    <textarea class="form-control" rows="3" name="" required></textarea>
+                    <textarea class="form-control" rows="3" name="alamat" required></textarea>
                 </div>
-                
-            </form>
+            
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-            <button type="button" class="btn btn-primary">Simpan</button>
+            <input type="submit" name="simpan" value="Simpan" class="btn btn-primary">
           </div>
+          <?= form_close() ?>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
@@ -73,27 +76,61 @@
     <div class="modal fade" tabindex="-1" role="dialog" id="editSupplier">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
+        <?= form_open('admin/supplier') ?>
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">Edit Data Supplier</h4>
           </div>
           <div class="modal-body">
-            <form>
                 <div class="form-group">
                     <label for="Nama">Nama</label>
-                    <input type="text" class="form-control" name="" value="" required>
+                    <input type="text" class="form-control" name="edit_nama" id="edit_nama" value="" required>
                 </div>
+                <input type="hidden" name="edit_id_suplier" id="edit_id_suplier">
                 <div class="form-group">
                     <label for="Alamat">Alamat</label>
-                    <textarea class="form-control" rows="3" name="" required></textarea>
+                    <textarea class="form-control" rows="3" name="edit_alamat" id="edit_alamat" required></textarea>
                 </div>
                 
-            </form>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-            <button type="button" class="btn btn-primary">Simpan</button>
+            <input type="submit" name="edit" value="Edit" class="btn btn-primary">
           </div>
+          <?= form_close() ?>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+    <script type="text/javascript">
+        function delete_supplier(id_supplier) {
+            $.ajax({
+                url: '<?= base_url('admin/supplier') ?>',
+                type: 'POST',
+                data: {
+                    id_suplier: id_supplier,
+                    delete: true
+                },
+                success: function() {
+                    window.location = '<?= base_url('admin/supplier') ?>';
+                }
+            });
+        }
+
+        function get_supplier(id_supplier) {
+            $.ajax({
+                url: '<?= base_url('admin/supplier') ?>',
+                type: 'POST',
+                data: {
+                    id_suplier: id_supplier,
+                    get: true
+                },
+                success: function(response) {
+                    response = JSON.parse(response);
+                    $('#edit_id_suplier').val(response.id_suplier);
+                    $('#edit_nama').val(response.nama_suplier);
+                    $('#edit_alamat').val(response.alamat);
+                }
+            });   
+        }
+    </script>
