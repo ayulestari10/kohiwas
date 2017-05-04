@@ -16,15 +16,76 @@ class Admin extends MY_Controller
             redirect('login');
             exit;
         }
+
+        $this->load->model('user_m');
+        $this->data['user'] = $this->user_m->get_row(['username' => $this->session->userdata('username')]);
     }
 
     public function index()
     {
-        $this->data = [
-            'title'		=> 'Admin',
-            'content'	=> 'admin/dashboard'
-        ];
+        $this->data['title']    = 'Admin';
+        $this->data['content']  = 'admin/dashboard'; 
         $this->template($this->data);
+    }
+
+    public function bahan_baku()
+    {
+        $this->load->model('bahan_baku_m');
+        $this->load->model('supplier_m');
+
+        if ($this->POST('simpan'))
+        {
+            $data_bahan_baku = [
+                'id_suplier'    => $this->POST('id_suplier'),
+                'nama_bahan'    => $this->POST('nama'),
+                'jenis_bahan'   => $this->POST('jenis'),
+                'satuan'        => $this->POST('satuan'),
+                'harga'         => $this->POST('harga')
+            ];
+            $this->bahan_baku_m->insert($data_bahan_baku);
+            $this->flashmsg('Input bahan baku berhasil');
+            redirect('admin/bahan_baku');
+            exit;
+        }
+
+        if ($this->POST('delete') && $this->POST('id_bahan_baku'))
+        {
+            $this->bahan_baku_m->delete($this->POST('id_bahan_baku'));
+            exit;
+        }
+
+        if ($this->POST('get') && $this->POST('id_bahan_baku'))
+        {
+            $data_bahan_baku = $this->bahan_baku_m->get_row(['id_bahan_baku' => $this->POST('id_bahan_baku')]);
+            $supp_dropdown = [];
+            $supplier = $this->supplier_m->get_by_order('id_suplier', 'DESC');
+            foreach ($supplier as $row)
+                $supp_dropdown[$row->id_suplier] = $row->nama_suplier;
+            $data_bahan_baku->dropdown = form_dropdown('edit_id_suplier', $supp_dropdown, $data_bahan_baku->id_suplier, ['class' => 'form-control', 'id' => 'edit_id_suplier']);
+            echo json_encode($data_bahan_baku);
+            exit;
+        }
+
+        if ($this->POST('edit'))
+        {
+            $edit_bahan_baku = [
+                'id_suplier'    => $this->POST('edit_id_suplier'),
+                'nama_bahan'    => $this->POST('edit_nama'),
+                'jenis_bahan'   => $this->POST('edit_jenis'),
+                'satuan'        => $this->POST('edit_satuan'),
+                'harga'         => $this->POST('edit_harga')
+            ];
+            $this->bahan_baku_m->update($this->POST('edit_id_bahan_baku'), $edit_bahan_baku);
+            $this->flashmsg('Data bahan baku berhasil di-edit');
+            redirect('admin/bahan_baku');
+            exit;
+        }
+
+        $this->data['title']        = 'Bahan Baku';
+        $this->data['content']      = 'admin/bahan_baku'; 
+        $this->data['supplier']     = $this->supplier_m->get();
+        $this->data['bahan_baku']   = $this->bahan_baku_m->get_by_order('id_bahan_baku', 'DESC');
+        $this->template($this->data);   
     }
 
     public function supplier()
@@ -67,11 +128,9 @@ class Admin extends MY_Controller
             exit;
         }
 
-        $this->data = [
-            'title'     => 'Supplier',
-            'content'   => 'admin/data_supplier',
-            'supplier'  => $this->supplier_m->get_by_order('id_suplier', 'DESC')
-        ];
+        $this->data['title']        = 'Supplier';
+        $this->data['content']      = 'admin/data_supplier';
+        $this->data['supplier']     = $this->supplier_m->get_by_order('id_suplier', 'DESC');
         $this->template($this->data);
     }
 

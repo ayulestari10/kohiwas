@@ -8,7 +8,7 @@
                 <img src="<?=base_url('assets/img/avatar3.png')?>" class="img-circle" alt="User Image" />
             </div>
             <div class="pull-left info">
-                <p>Hello, Jane</p>
+                <p>Hello, <?= $user->username ?></p>
 
                 <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
             </div>
@@ -16,7 +16,7 @@
         <!-- sidebar menu: : style can be found in sidebar.less -->
         <ul class="sidebar-menu">
             <li class="active">
-                <a href="index.html">
+                <a href="<?= base_url('admin') ?>">
                     <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                 </a>
             </li>
@@ -38,8 +38,8 @@
                     <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
-                    <li><a href="pages/UI/general.html"><i class="fa fa-angle-double-right"></i> Daftar Suplier</a></li>
-                    <li><a href="pages/UI/icons.html"><i class="fa fa-angle-double-right"></i> Data Bahan Baku</a></li>
+                    <li><a href="<?= base_url('admin/supplier') ?>"><i class="fa fa-angle-double-right"></i> Daftar Supplier</a></li>
+                    <li><a href="<?= base_url('admin/bahan_baku') ?>"><i class="fa fa-angle-double-right"></i> Data Bahan Baku</a></li>
                 </ul>
             </li>
             <li class="treeview">

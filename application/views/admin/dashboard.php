@@ -80,13 +80,13 @@
                                       65
                                     </h3>
                                     <p>
-                                        Jenis Bahan Baku
+                                        Bahan Baku
                                     </p>
                                 </div>
                                 <div class="icon">
                                     <i class="ion ion-pie-graph"></i>
                                 </div>
-                                <a href="#" class="small-box-footer">
+                                <a href="<?= base_url('admin/bahan_baku') ?>" class="small-box-footer">
                                     Selengkapnya<i class="fa fa-arrow-circle-right"></i>
                                 </a>
                             </div>
