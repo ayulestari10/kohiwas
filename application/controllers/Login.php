@@ -8,9 +8,6 @@ class Login extends MY_Controller
 	{
 		parent::__construct();
 		$username = $this->session->userdata('username');
-		$this->dump($username);
-		$x = $this->session->all_userdata();
-		$this->dump($x);
 		if (isset($username))
 		{
 			$this->data['id_role'] = $this->session->userdata('id_role');
@@ -39,11 +36,8 @@ class Login extends MY_Controller
 				'password'	=> md5($this->POST('password'))
 			];
 
-			$login_session = $this->login_m->login($this->data);
-			$this->session->set_userdata([
-				'username'	=> $login_session->username,
-				'id_role'	=> $login_session->id_role
-			]);
+			$this->login_m->login($this->data);
+			
 			redirect('login');
 			exit;
 		}

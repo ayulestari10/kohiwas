@@ -11,6 +11,8 @@ class Admin extends MY_Controller
     $this->data['id_role'] = $this->session->userdata('id_role');
     if (!isset($this->data['id_role']))
     {
+      $this->session->unset_userdata('username');
+      $this->session->unset_userdata('id_role');
       redirect('login');
       exit;
     }

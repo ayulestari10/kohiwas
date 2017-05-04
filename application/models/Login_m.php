@@ -22,9 +22,12 @@ class Login_m extends MY_Model
 				'tanggal'	=> date('Y-m-d'),
 				'waktu'		=> date('H:i:s')
 			];
-			
 			$this->log_login_m->insert($log);
-			return $result;
+			$this->session->set_userdata([
+				'username'	=> $result->username,
+				'id_role'	=> $result->id_role
+			]);
+			return TRUE;
 		}
 
 		return FALSE;
