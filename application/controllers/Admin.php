@@ -28,6 +28,52 @@ class Admin extends MY_Controller
         $this->template($this->data);
     }
 
+    public function unit()
+    {
+        $this->load->model('unit_m');
+        if ($this->POST('simpan'))
+        {
+            $data_unit = [
+                'nama_unit'     => $this->POST('nama_unit'),
+                'alamat_kantor' => $this->POST('alamat_kantor')
+            ];
+            $this->unit_m->insert($data_unit);
+            $this->flashmsg('Data unit berhasil disimpan');
+            redirect('admin/unit');
+            exit;
+        }
+
+        if ($this->POST('delete') && $this->POST('id_unit'))
+        {
+            $this->unit_m->delete($this->POST('id_unit'));
+            exit;
+        }
+
+        if ($this->POST('get') && $this->POST('id_unit'))
+        {
+            $data_unit = $this->unit_m->get_row(['id_unit' => $this->POST('id_unit')]);
+            echo json_encode($data_unit);
+            exit;
+        }
+
+        if ($this->POST('edit'))
+        {
+            $edit_unit = [
+                'nama_unit'         => $this->POST('edit_nama'),
+                'alamat_kantor'     => $this->POST('edit_kantor')
+            ];
+            $this->unit_m->update($this->POST('edit_id_unit'), $edit_unit);
+            $this->flashmsg('Data unit berhasil di-edit');
+            redirect('admin/unit');
+            exit;
+        }
+
+        $this->data['unit']     = $this->unit_m->get_by_order('id_unit', 'DESC');
+        $this->data['title']    = 'Data Unit';
+        $this->data['content']  = 'admin/data_unit';
+        $this->template($this->data);
+    }
+
     public function bahan_baku()
     {
         $this->load->model('bahan_baku_m');
