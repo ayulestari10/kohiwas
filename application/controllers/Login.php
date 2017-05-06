@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 class Login extends MY_Controller
 {
@@ -16,7 +16,7 @@ class Login extends MY_Controller
 				case 1:
 					redirect('admin');
 					break;
-				case 3:
+				case 2:
 					redirect('operator');
 					break;
 			}
@@ -37,7 +37,7 @@ class Login extends MY_Controller
 			];
 
 			$this->login_m->login($this->data);
-			
+
 			redirect('login');
 			exit;
 		}
