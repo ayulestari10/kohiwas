@@ -22,13 +22,12 @@
                         <table class="table table-striped">
                             <tr>
                                 <th>No</th>
-                                <th>ID Supplier</th>
-                                <th>ID Bahan Baku</th>
-                                <th>Username Unit</th>
-                                <th>Waktu</th>
+                                <th>Unit</th>
+                                <th>Tanggal Permintaan</th>
                                 <th>Batas Waktu</th>
-                                <th>Tujuan</th>
                                 <th>Status</th>
+                                <th>Keterangan</th>
+                                <th>Aksi</th>
                                 <th width="150"></th>
                             </tr>
                             <tr>
@@ -157,4 +156,3 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-
