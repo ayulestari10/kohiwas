@@ -1,7 +1,4 @@
 <?php
-/**
- *
- */
 class Admin extends MY_Controller
 {
 
@@ -132,6 +129,13 @@ class Admin extends MY_Controller
         $this->data['supplier']     = $this->supplier_m->get();
         $this->data['bahan_baku']   = $this->bahan_baku_m->get_by_order('id_bahan_baku', 'DESC');
         $this->template($this->data);   
+    }
+
+    public function bahan_baku_min()
+    {
+        $this->data['title']    = 'Bahan Baku Minimum';
+        $this->data['content']  = 'admin/bahan_baku_min';
+        $this->template($this->data);
     }
 
     public function supplier()
