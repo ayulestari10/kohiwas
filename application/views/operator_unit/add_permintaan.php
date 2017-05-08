@@ -10,7 +10,7 @@
                                 <?= form_open('operator/detail_permintaan/'.$id) ?>
                                     <div class="box-body">
                                         <div class="form-group">
-                                            <label for="jumlah">Email address</label>
+                                            <label for="jumlah">Jumlah</label>
                                             <input type="number" class="form-control" name="jumlah_permintaan" placeholder="Jumlah">
                                         </div>
                                         <input type="hidden" name="id_permintaan" value="<?=$id?>">

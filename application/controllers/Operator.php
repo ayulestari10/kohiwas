@@ -1,7 +1,4 @@
 <?php
-/**
- *
- */
 class Operator extends MY_Controller
 {
 
@@ -51,11 +48,11 @@ class Operator extends MY_Controller
 
     if ($this->POST('simpan')) {
       $data_permintaan = [
-        'nama' => $this->POST('nama'),
-        'keterangan' => $this->POST('keterangan'),
-        'tanggal_permintaan' => date("Y-m-d"),
-        'id_unit' => $op->id_unit,
-        'batas_waktu' => date("Y-m-d",strtotime($this->POST('batas_waktu')))
+        'nama'                => $this->POST('nama'),
+        'keterangan'          => $this->POST('keterangan'),
+        'tanggal_permintaan'  => date("Y-m-d"),
+        'id_unit'             => $op->id_unit,
+        'batas_waktu'         => date("Y-m-d",strtotime($this->POST('batas_waktu')))
       ];
       $this->permintaan_bahan_baku_m->insert($data_permintaan);
       $this->flashmsg('Permintaan berhasil disimpan untuk dikonfirmasi');

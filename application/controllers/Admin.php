@@ -135,23 +135,40 @@ class Admin extends MY_Controller
 
     public function bahan_baku_min()
     {
-        $this->data['title']    = 'Bahan Baku Minimum';
-        $this->data['content']  = 'admin/bahan_baku_min';
+        $this->load->model('bahan_baku_m');
+        $this->data['title']            = 'Bahan Baku Minimum';
+        $this->data['content']          = 'admin/bahan_baku_min';
+        $this->data['bahan_baku_min']   = $this->bahan_baku_m->stok_minimum();
         $this->template($this->data);
     }
 
     public function permintaan ()
     {
+        $this->load->model('unit_m');
         $this->load->model('permintaan_bahan_baku_m');
-
-        if ($this->POST('simpan'))
-        {
-            
-        }
-
         $this->data['title']        = 'Data Permintaan';
         $this->data['content']      = 'admin/permintaan';
-        $this->data['permintaan']   = $this->permintaan_bahan_baku_m->get_by_order('id_permintaan', 'DESC', ['approved' => 1]);
+        $this->data['permintaan']   = $this->permintaan_bahan_baku_m->get_by_order('id_permintaan', 'DESC');
+        $this->template($this->data);
+    }
+
+    public function detail_permintaan()
+    {
+        $id_permintaan = $this->uri->segment(3);
+        if (!isset($id_permintaan))
+        {
+            redirect('admin/permintaan');
+            exit;
+        }
+
+        $this->load->model('permintaan_bahan_baku_m');
+        $this->load->model('detail_permintaan_m');
+        $this->load->model('bahan_baku_m');
+
+        $this->data['title'] = 'Detail Permintaan';
+        $this->data['content'] = 'admin/detail_permintaan';
+        $this->data['bahan'] = $this->bahan_baku_m->get();
+        $this->data['detail'] = $this->detail_permintaan_m->get(['id_permintaan'=> $this->uri->segment(3)]);
         $this->template($this->data);
     }
 
