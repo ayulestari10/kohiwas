@@ -81,6 +81,8 @@ class Admin extends MY_Controller
             $data_bahan_baku = [
                 'id_suplier'    => $this->POST('id_suplier'),
                 'nama_bahan'    => $this->POST('nama'),
+                'stok'          => $this->POST('stok'),
+                'stok_min'      => $this->POST('stok_min'),
                 'jenis_bahan'   => $this->POST('jenis'),
                 'satuan'        => $this->POST('satuan'),
                 'harga'         => $this->POST('harga')
@@ -135,6 +137,21 @@ class Admin extends MY_Controller
     {
         $this->data['title']    = 'Bahan Baku Minimum';
         $this->data['content']  = 'admin/bahan_baku_min';
+        $this->template($this->data);
+    }
+
+    public function permintaan ()
+    {
+        $this->load->model('permintaan_bahan_baku_m');
+
+        if ($this->POST('simpan'))
+        {
+            
+        }
+
+        $this->data['title']        = 'Data Permintaan';
+        $this->data['content']      = 'admin/permintaan';
+        $this->data['permintaan']   = $this->permintaan_bahan_baku_m->get_by_order('id_permintaan', 'DESC', ['approved' => 1]);
         $this->template($this->data);
     }
 
