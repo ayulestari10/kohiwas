@@ -24,8 +24,6 @@ class Operator extends MY_Controller
         exit;
     }
     $this->load->model('operator_unit_m');
-    $this->load->model('user_m');
-    $this->data['user'] = $this->user_m->get_row(['username' => $this->session->userdata('username')]);
   }
 
   public function index()
