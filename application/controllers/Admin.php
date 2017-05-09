@@ -25,7 +25,7 @@ class Admin extends MY_Controller
     {
         $this->data['title']    = 'Admin';
         $this->data['content']  = 'admin/dashboard'; 
-        $this->template($this->data);
+        $this->template($this->data,'operator');
     }
 
     public function unit()
