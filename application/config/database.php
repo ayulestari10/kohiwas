@@ -77,7 +77,11 @@ $db['default'] = array(
 	'dsn'	=> '',
 	'hostname' => 'localhost',
 	'username' => 'root',
+<<<<<<< HEAD
 	'password' => 'risusanto8',
+=======
+	'password' => '',
+>>>>>>> d77fe6d07c684c04ac4f49eaca44512cbf16ca8e
 	'database' => 'tirta_randik',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',

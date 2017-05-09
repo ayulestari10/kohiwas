@@ -27,7 +27,7 @@
                     <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
-                    <li><a href="pages/charts/morris.html"><i class="fa fa-angle-double-right"></i> Daftar Permintaan</a></li>
+                    <li><a href="<?= base_url('admin/permintaan') ?>"><i class="fa fa-angle-double-right"></i> Daftar Permintaan</a></li>
                     <li><a href="pages/charts/flot.html"><i class="fa fa-angle-double-right"></i> Rencana Pembelian</a></li>
                 </ul>
             </li>

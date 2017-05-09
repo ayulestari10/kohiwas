@@ -26,7 +26,8 @@
                                 <th>Supplier</th>
                                 <th>Nama</th>
                                 <th>Jenis</th>
-                                <th>Satuan</th>
+                                <th>Stok</th>
+                                <th>Stok Minimum</th>
                                 <th>Harga</th>
                                 <th width="150"></th>
                             </tr>
@@ -36,6 +37,8 @@
                                 <td><?= $this->supplier_m->get_row(['id_suplier' => $row->id_suplier])->nama_suplier ?></td>
                                 <td><?= $row->nama_bahan ?></td>
                                 <td><?= $row->jenis_bahan ?></td>
+                                <td><?= $row->stok ?></td>
+                                <td><?= $row->stok_min ?></td>
                                 <td><?= $row->satuan ?></td>
                                 <td><?= $row->harga ?></td>
                                 <td>
@@ -78,6 +81,14 @@
                     <input type="text" class="form-control" name="jenis" required>
                 </div>
                 <div class="form-group">
+                    <label for="Jenis">Stok *</label>
+                    <input type="text" class="form-control" name="stok" id="stok" required>
+                </div>
+                <div class="form-group">
+                    <label for="Jenis">Stok Minimum *</label>
+                    <input type="text" class="form-control" name="stok_min" id="stok_min" required>
+                </div>
+                <div class="form-group">
                     <label for="Satuan">Satuan *</label>
                     <input type="text" class="form-control" name="satuan" required>
                 </div>
@@ -116,6 +127,14 @@
                 <div class="form-group">
                     <label for="Jenis">Jenis *</label>
                     <input type="text" class="form-control" name="edit_jenis" id="edit_jenis" required>
+                </div>
+                <div class="form-group">
+                    <label for="Jenis">Stok *</label>
+                    <input type="text" class="form-control" name="edit_stok" id="edit_stok" required>
+                </div>
+                <div class="form-group">
+                    <label for="Jenis">Stok Minimum *</label>
+                    <input type="text" class="form-control" name="edit_stok_min" id="edit_stok_min" required>
                 </div>
                 <div class="form-group">
                     <label for="Satuan">Satuan *</label>
@@ -164,6 +183,8 @@
                     $('#edit_id_bahan_baku').val(response.id_bahan_baku);
                     $('#edit_nama').val(response.nama_bahan);
                     $('#edit_jenis').val(response.jenis_bahan);
+                    $('#edit_stok').val(response.stok);
+                    $('#edit_stok_min').val(response.stok_min);
                     $('#edit_satuan').val(response.satuan);
                     $('#edit_harga').val(response.harga);
                     $('#edit_supplier').html(response.dropdown);

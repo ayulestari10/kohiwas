@@ -24,21 +24,27 @@
                                 <th>No</th>
                                 <th>Nama</th>
                                 <th>Jenis</th>
+                                <th>Stok</th>
+                                <th>Stok Minimum</th>
                                 <th>Satuan</th>
                                 <th>Harga</th>
                                 <!-- <th width="150"></th> -->
                             </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>aa</td>
-                                <td>aa</td>
-                                <td>aa</td>
-                                <td>aa</td>
-                                <!-- <td>
-                                    <button class="btn btn-info" data-toggle="modal" data-target="#edit"><i class="fa fa-pencil"></i></button>
-                                    <button class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
-                                </td> -->
-                            </tr>
+                            <?php $i = 0; foreach ($bahan_baku_min as $row): ?>
+                                <tr>
+                                    <td><?= ++$i ?></td>
+                                    <td><?= $row->nama_bahan ?></td>
+                                    <td><?= $row->jenis_bahan ?></td>
+                                    <td><?= $row->stok ?></td>
+                                    <td><?= $row->stok_min ?></td>
+                                    <td><?= $row->satuan ?></td>
+                                    <td><?= $row->harga ?></td>
+                                    <td>
+                                        <button class="btn btn-info" data-toggle="modal" data-target="#edit"><i class="fa fa-pencil"></i></button>
+                                        <button class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         </table>
                     </div>
                 </div>
