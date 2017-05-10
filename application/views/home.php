@@ -1,237 +1,105 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Tirta Randik</title>
-	<link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/bootstrap.min.css') ?>">
-	<script type="text/javascript" src="<?= base_url('assets/js/jquery.js') ?>"></script>
-	<script type="text/javascript" src="<?= base_url('assets/js/bootstrap.min.js') ?>"></script>
+	<meta charset="UTF-8">
+    <title>LOGIN | KOHIWAS</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+    <!-- bootstrap 3.0.2 -->
+    <link href="<?= base_url('') ?>assets/AdminLTE/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- font Awesome -->
+    <link href="<?= base_url('') ?>assets/AdminLTE/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+	<script src="http://mymaplist.com/js/vendor/TweenLite.min.js"></script>
 	<style type="text/css">
-		body{
-			margin-top: 2%;
-		}
-		.panel-login {
-			border-color: #ccc;
-			-webkit-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
-			-moz-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
-			box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
-		}
-		.panel-login>.panel-heading {
-			color: #00415d;
-			background-color: #fff;
-			border-color: #fff;
-			text-align:center;
-		}
-		.panel-login>.panel-heading a{
-			text-decoration: none;
-			color: #666;
-			font-weight: bold;
-			font-size: 15px;
-			-webkit-transition: all 0.1s linear;
-			-moz-transition: all 0.1s linear;
-			transition: all 0.1s linear;
-		}
-		.panel-login>.panel-heading a.active{
-			color: #029f5b;
-			font-size: 18px;
-		}
-		.panel-login>.panel-heading hr{
-			margin-top: 10px;
-			margin-bottom: 0px;
-			clear: both;
-			border: 0;
-			height: 1px;
-			background-image: -webkit-linear-gradient(left,rgba(0, 0, 0, 0),rgba(0, 0, 0, 0.15),rgba(0, 0, 0, 0));
-			background-image: -moz-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
-			background-image: -ms-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
-			background-image: -o-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
-		}
-		.panel-login input[type="text"],.panel-login input[type="email"],.panel-login input[type="password"] {
-			height: 45px;
-			border: 1px solid #ddd;
-			font-size: 16px;
-			-webkit-transition: all 0.1s linear;
-			-moz-transition: all 0.1s linear;
-			transition: all 0.1s linear;
-		}
-		.panel-login input:hover,
-		.panel-login input:focus {
-			outline:none;
-			-webkit-box-shadow: none;
-			-moz-box-shadow: none;
-			box-shadow: none;
-			border-color: #ccc;
-		}
-		.btn-login {
-			background-color: #59B2E0;
-			outline: none;
-			color: #fff;
-			font-size: 14px;
-			height: auto;
-			font-weight: normal;
-			padding: 14px 0;
-			text-transform: uppercase;
-			border-color: #59B2E6;
-		}
-		.btn-login:hover,
-		.btn-login:focus {
-			color: #fff;
-			background-color: #53A3CD;
-			border-color: #53A3CD;
-		}
-		.forgot-password {
-			text-decoration: underline;
-			color: #888;
-		}
-		.forgot-password:hover,
-		.forgot-password:focus {
-			text-decoration: underline;
-			color: #666;
-		}
-
-		.btn-register {
-			background-color: #1CB94E;
-			outline: none;
-			color: #fff;
-			font-size: 14px;
-			height: auto;
-			font-weight: normal;
-			padding: 14px 0;
-			text-transform: uppercase;
-			border-color: #1CB94A;
-		}
-		.btn-register:hover,
-		.btn-register:focus {
-			color: #fff;
-			background-color: #1CA347;
-			border-color: #1CA347;
-		}
-		.foto_depan img{
-			width: 105%; height: 100%;
-		}
-		#log_in, #title2{
-			width: 85%; height: 85%;
-			margin: 0 auto;
-		}
-		#title2{
-			font-size: 24px;
-			text-align: center;
-			margin-bottom: 5%;
-			font-family: 'Times News Roman';
-		}
+	    body {
+	        background-color: #444;
+	        background: url(http://s18.postimg.org/l7yq0ir3t/pick8_1.jpg);
+	        
+	    }
+	    .form-signin input[type="text"] {
+	        margin-bottom: 5px;
+	        border-bottom-left-radius: 0;
+	        border-bottom-right-radius: 0;
+	    }
+	    .form-signin input[type="password"] {
+	        margin-bottom: 10px;
+	        border-top-left-radius: 0;
+	        border-top-right-radius: 0;
+	    }
+	    .form-signin .form-control {
+	        position: relative;
+	        font-size: 16px;
+	        font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+	        height: auto;
+	        padding: 10px;
+	        -webkit-box-sizing: border-box;
+	        -moz-box-sizing: border-box;
+	        box-sizing: border-box;
+	    }
+	    .vertical-offset-100 {
+	        padding-top: 100px;
+	    }
+	    .img-responsive {
+	    display: block;
+	    max-width: 100%;
+	    height: auto;
+	    margin: auto;
+	    }
+	    .panel {
+	    margin-bottom: 20px;
+	    background-color: rgba(255, 255, 255, 0.75);
+	    border: 1px solid transparent;
+	    border-radius: 4px;
+	    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+	    box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+	    }
 	</style>
 </head>
 <body>
-	<div class="row">
-		<div class="col-md-7">
-			<div class="foto_depan">
-				<img src="<?= base_url('assets/img/nampak foto kantor.jpg') ?>">
-			</div>
-		</div>
-		<div class="col-md-5">
-			<div class="row">
-				<div id="log_in">
-					<div class="panel panel-login">
-						<div id="title2">
-							<strong>PERUSAHAAN DAERAH AIR MINUM</br>
-							"TIRTA RANDIK"</br></strong>
-							Selamat Datang. Silahkan Login Dahulu.
-						</div>
-						<div class="panel-heading">
-							<div class="row">
-								<div class="col-xs-6">
-									<a href="#" class="active" id="login-form-link">Login</a>
-								</div>
-								<div class="col-xs-6">
-									<a href="#" id="register-form-link">Register</a>
-								</div>
-							</div>
-							<hr>
-						</div>
-						<div class="panel-body">
-							<div class="row">
-								<div class="col-lg-12">
-									<?= form_open('login', ['id' => 'login-form', 'role' => 'form', 'style' => 'display: block;']) ?>
-									<!-- <form id="login-form" action="" method="post" role="form" style="display: block;"> -->
-										<div class="form-group">
-											<input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">
-										</div>
-										<div class="form-group">
-											<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password">
-										</div>
-										<div class="form-group text-center">
-											<input type="checkbox" tabindex="3" class="" name="remember" id="remember">
-											<label for="remember"> Remember Me</label>
-										</div>
-										<div class="form-group">
-											<div class="row">
-												<div class="col-sm-6 col-sm-offset-3">
-													<input type="submit" name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-login" value="Log In">
-												</div>
-											</div>
-										</div>
-										<div class="form-group">
-											<div class="row">
-												<div class="col-lg-12">
-													<div class="text-center">
-														<a href="http://phpoll.com/recover" tabindex="5" class="forgot-password">Forgot Password?</a>
-													</div>
-												</div>
-											</div>
-										</div>
-									<?= form_close() ?>
-									<form id="register-form" action="http://phpoll.com/register/process" method="post" role="form" style="display: none;">
-										<div class="form-group">
-											<input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">
-										</div>
-										<div class="form-group">
-											<input type="email" name="email" id="email" tabindex="1" class="form-control" placeholder="Email Address" value="">
-										</div>
-										<div class="form-group">
-											<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password">
-										</div>
-										<div class="form-group">
-											<input type="password" name="confirm-password" id="confirm-password" tabindex="2" class="form-control" placeholder="Confirm Password">
-										</div>
-										<div class="form-group">
-											<div class="row">
-												<div class="col-sm-6 col-sm-offset-3">
-													<input type="submit" name="register-submit" id="register-submit" tabindex="4" class="form-control btn btn-register" value="Register Now">
-												</div>
-											</div>
-										</div>
-									</form>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="container">
+        <div class="row vertical-offset-100">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">                                
+                        <div class="row-fluid user-row">
+                            <img src="http://s11.postimg.org/7kzgji28v/logo_sm_2_mr_1.png" class="img-responsive" alt="Conxole Admin"/>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <form accept-charset="UTF-8" role="form" class="form-signin">
+                            <fieldset>
+                                <label class="panel-login">
+                                    <div class="login_result"></div>
+                                </label>
+                                <input class="form-control" placeholder="Username" id="username" type="text">
+                                <input class="form-control" placeholder="Password" id="password" type="password">
+                                <br></br>
+                                <input class="btn btn-lg btn-success btn-block" type="submit" id="login" value="Login »">
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<script type="text/javascript">
-		$(function() {
-
-		    $('#login-form-link').click(function(e) {
-				$("#login-form").delay(100).fadeIn(100);
-		 		$("#register-form").fadeOut(100);
-				$('#register-form-link').removeClass('active');
-				$(this).addClass('active');
-				e.preventDefault();
-			});
-			$('#register-form-link').click(function(e) {
-				$("#register-form").delay(100).fadeIn(100);
-		 		$("#login-form").fadeOut(100);
-				$('#login-form-link').removeClass('active');
-				$(this).addClass('active');
-				e.preventDefault();
-			});
-
-		});
-
-	</script>
-
+    <script type="text/javascript">
+    	$(document).ready(function() {
+		    $(document).mousemove(function(event) {
+		        TweenLite.to($("body"), 
+		        .5, {
+		            css: {
+		                backgroundPosition: "" + parseInt(event.pageX / 8) + "px " + parseInt(event.pageY / '12') + "px, " + parseInt(event.pageX / '15') + "px " + parseInt(event.pageY / '15') + "px, " + parseInt(event.pageX / '30') + "px " + parseInt(event.pageY / '30') + "px",
+		            	"background-position": parseInt(event.pageX / 8) + "px " + parseInt(event.pageY / 12) + "px, " + parseInt(event.pageX / 15) + "px " + parseInt(event.pageY / 15) + "px, " + parseInt(event.pageX / 30) + "px " + parseInt(event.pageY / 30) + "px"
+		            }
+		        })
+		    })
+		})
+    </script>
+    <!-- jQuery 2.0.2 -->
+    <script src="<?= base_url('assets/js/jquery.js') ?>"></script>
+    <!-- jQuery UI 1.10.3 -->
+    <script src="<?= base_url('') ?>assets/AdminLTE/js/jquery-ui-1.10.3.min.js" type="text/javascript"></script>
+    <!-- Bootstrap -->
+    <script src="<?= base_url('') ?>assets/AdminLTE/js/bootstrap.min.js" type="text/javascript"></script>
 </body>
 </html>
