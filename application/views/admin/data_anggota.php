@@ -1,19 +1,19 @@
 <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Data Unit <button class="btn btn-success" data-toggle="modal" data-target="#add"><i class="fa fa-plus"></i></button>
+            Data Anggota <button class="btn btn-success" data-toggle="modal" data-target="#add"><i class="fa fa-plus"></i></button>
             <small></small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Data Unit</li>
+            <li class="active">Data Anggota</li>
         </ol>
     </section>
 
     <!-- Main content -->
     <section class="content">
         <div class="row">
-            <div class="col-xs-10">
+            <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header">
                         <!-- <h3 class="box-title">Data Supplier</h3>   -->
@@ -23,21 +23,25 @@
                         <table class="table table-striped">
                             <tr>
                                 <th>No</th>
+                                <th>NLP</th>
                                 <th>Nama</th>
-                                <th>Nomor Kantor</th>
-                                <th width="150"></th>
+                                <th>Tanggal Mendaftar</th>
+                                <th>Alamat</th>
+                                <th>Simpanan Pokok</th>
+                                <th></th>
                             </tr>
-                            <?php $i = 0; foreach ($unit as $row): ?>
                             <tr>
-                                <td><?= ++$i ?></td>
-                                <td><?= $row->nama_unit ?></td>
-                                <td><?= $row->alamat_kantor ?></td>
+                                <td>1.</td>
+                                <td>08082016</td>
+                                <td>Cantiks</td>
+                                <td>nak tau nian</td>
+                                <td>Hatimu</td>
+                                <td>tak terhingga</td>
                                 <td>
-                                    <button class="btn btn-info" onclick="get_unit(<?= $row->id_unit ?>)" data-toggle="modal" data-target="#edit"><i class="fa fa-pencil"></i></button>
-                                    <button class="btn btn-danger" onclick="delete_unit(<?= $row->id_unit ?>)"><i class="fa fa-trash-o"></i></button>
+                                    <button class="btn btn-info" data-toggle="modal" data-target="#edit" onclick=""><i class="fa fa-pencil"></i></button>
+                                    <button class="btn btn-danger" onclick=""><i class="fa fa-trash-o"></i></button>
                                 </td>
                             </tr>
-                            <?php endforeach; ?>
                         </table>
                     </div>
                 </div>
@@ -47,20 +51,32 @@
 
     <div class="modal fade" tabindex="-1" role="dialog" id="add">
       <div class="modal-dialog" role="document">
+        <?= form_open('admin/') ?>
         <div class="modal-content">
-        <?= form_open('admin/unit') ?>
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Tambah Data Unit</h4>
+            <h4 class="modal-title">Tambah Data Anggota</h4>
           </div>
           <div class="modal-body">
                 <div class="form-group">
-                    <label for="Nama">Nama *</label>
-                    <input type="text" class="form-control" name="nama_unit" required>
+                    <label for="NLP">NLP *</label>
+                    <input type="text" class="form-control" name="" required>
                 </div>
                 <div class="form-group">
-                    <label for="alamat_kantor">Alamat Kantor *</label>
-                    <input type="text" class="form-control" name="alamat_kantor" required>
+                    <label for="Nama">Nama *</label>
+                    <input type="text" class="form-control" name="" required>
+                </div>
+                <div class="form-group">
+                    <label for="Tanggal Mendaftar">Tanggal Mendaftar *</label>
+                    <input type="text" class="form-control" name="" required>
+                </div>
+                <div class="form-group">
+                    <label for="Alamat">Alamat *</label>
+                    <textarea class="form-control" rows="3" name="alamat" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="Simpanan Pokok">Simpanan Pokok *</label>
+                    <input type="text" class="form-control" name="" required>
                 </div>
           </div>
           <div class="modal-footer">
@@ -75,20 +91,31 @@
     <div class="modal fade" tabindex="-1" role="dialog" id="edit">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
-        <?= form_open('admin/unit') ?>
+        <?= form_open('admin/bahan_baku') ?>
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Edit Data Bahan Baku</h4>
+            <h4 class="modal-title">Edit Data Anggota</h4>
           </div>
           <div class="modal-body">
                 <div class="form-group">
-                    <label for="Nama">Nama *</label>
-                    <input type="text" class="form-control" name="edit_nama" id="edit_nama" required>
+                    <label for="NLP">NLP *</label>
+                    <input type="text" class="form-control" name="" required>
                 </div>
-                <input type="hidden" name="edit_id_unit" id="edit_id_unit">
                 <div class="form-group">
-                    <label for="Nomor Kantor">Alamat Kantor *</label>
-                    <input type="text" class="form-control" name="edit_kantor" id="edit_kantor" required>
+                    <label for="Nama">Nama *</label>
+                    <input type="text" class="form-control" name="" required>
+                </div>
+                <div class="form-group">
+                    <label for="Tanggal Mendaftar">Tanggal Mendaftar *</label>
+                    <input type="text" class="form-control" name="" required>
+                </div>
+                <div class="form-group">
+                    <label for="Alamat">Alamat *</label>
+                    <textarea class="form-control" rows="3" name="alamat" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="Simpanan Pokok">Simpanan Pokok *</label>
+                    <input type="text" class="form-control" name="" required>
                 </div>
           </div>
           <div class="modal-footer">
@@ -99,37 +126,3 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-
-    <script type="text/javascript">
-        function delete_unit(id_unit) {
-            $.ajax({
-                url: '<?= base_url('admin/unit') ?>',
-                type: 'POST',
-                data: {
-                    id_unit: id_unit,
-                    delete: true
-                },
-                success: function() {
-                    window.location = '<?= base_url('admin/unit') ?>';
-                }
-            });
-        }
-
-        function get_unit(id_unit) {
-            $.ajax({
-                url: '<?= base_url('admin/unit') ?>',
-                type: 'POST',
-                data: {
-                    id_unit: id_unit,
-                    get: true
-                },
-                success: function(response) {
-                    response = JSON.parse(response);
-                    console.log(response);
-                    $('#edit_id_unit').val(response.id_unit);
-                    $('#edit_nama').val(response.nama_unit);
-                    $('#edit_kantor').val(response.alamat_kantor);
-                }
-            });   
-        }
-    </script>

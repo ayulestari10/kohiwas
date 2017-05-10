@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-    <title>LOGIN | KOHIWAS</title>
+    <title>Login | KOHIWAS</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <!-- bootstrap 3.0.2 -->
     <link href="<?= base_url('') ?>assets/AdminLTE/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -65,17 +65,21 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <form accept-charset="UTF-8" role="form" class="form-signin">
+                    	<?= form_open('login', ['id' => 'login-form', 'role' => 'form', 'style' => 'display: block;']) ?>
                             <fieldset>
                                 <label class="panel-login">
                                     <div class="login_result"></div>
                                 </label>
-                                <input class="form-control" placeholder="Username" id="username" type="text">
-                                <input class="form-control" placeholder="Password" id="password" type="password">
+                                <div class="form-group">
+									<input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">
+								</div>
+								<div class="form-group">
+									<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password">
+								</div>
                                 <br></br>
-                                <input class="btn btn-lg btn-success btn-block" type="submit" id="login" value="Login »">
+                                <input class="btn btn-lg btn-success btn-block" type="submit" id="login" value="Login »" name="login-submit">
                             </fieldset>
-                        </form>
+                        <?= form_close() ?>
                     </div>
                 </div>
             </div>
