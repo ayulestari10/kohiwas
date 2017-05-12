@@ -6,6 +6,6 @@ class Log_login_m extends MY_Model
 	{
 		parent::__construct();
 		$this->data['table_name']	= 'log_login';
-		$this->data['primary_key']	= 'id_log';
+		$this->data['primary_key']	= 'id_log_login';
 	}
 }
