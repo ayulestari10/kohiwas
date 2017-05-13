@@ -8,13 +8,13 @@
 	<div id="bigWrapper">
 		<div class="header">
 			<div class="logo">
-				<img src="<?= base_url('') ?>assets/logo/logo.jpg">
+				<img src="<?= base_url('') ?>assets/logo/logoo.jpg">
 			</div>
 
 			<div class="title">
 				<strong>
-					PERUSAHAAN DAERAH AIR MINUM </br>
-					"TIRTA RANDIK"
+					PERUSAHAAN KOMUNITAS HIMPUNAN PENGAWAS </br>
+					"KOHIWAS"
 				</strong>
 				<div class="kontak">
 					Jalan Merdeka No. 123 Serasan Jaya Sekayu Kabupaten. Musi Banyuasin Sumatera Selatan</br>
@@ -26,23 +26,24 @@
 			<hr style="margin-top: -13px;">	
 		</div>
 		<div class="content">
-			<strong style="font-size: 22px;">Laporan Data Bahan Baku</strong>
+			<strong style="font-size: 22px;">Laporan Data Anggota</strong>
 			<table style="margin-top: 10px;">
 				<tr>
-                    <th>No</th>
-                    <th>ID Supplier</th>
-                    <th>Nama</th>
-                    <th>Jenis</th>
-                    <th>Satuan</th>
-                    <th>Harga</th>
-                </tr>
-                <tr>
-                    <td>1</td>
-                    <td>aa</td>
-                    <td>aa</td>
-                    <td>aa</td>
-                    <td>aa</td>
-                    <td>aa</td>
+					<th style="min-width: 40px;">No</th>
+					<th style="min-width: 90px;">ID Anggota</th>
+					<th style="min-width: 200px;">Nama</th>
+					<th style="min-width: 150px;">Tanggal Mendaftar</th>
+					<th style="min-width: 300px;">Alamat</th>
+					<th style="min-width: 200px;">Simpanan Pokok</th>
+				</tr>
+				<tr>
+					<td>1</td>
+					<td>01</td>
+					<td>Lifya</td>
+					<td>12-02-1998</td>
+					<td>Komplek Griya Mulya</td>
+					<td>12.000.000</td>
+				</tr>
 			</table>
 		</div>
 	</div>
