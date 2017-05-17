@@ -75,6 +75,18 @@
                     <li><a href="<?= base_url('ketua_koperasi/data_angsuran') ?>"><i class="fa fa-angle-double-right"></i> Angsuran</a></li>
                 </ul>
             </li>
+            <li>
+                <a href="<?= base_url('ketua_koperasi/data_jurnal') ?>">
+                    <i class="fa fa-book"></i>
+                    <span>Jurnal</span>
+                </a>
+            </li>
+            <li>
+                <a href="<?= base_url('ketua_koperasi/data_bukuBesar') ?>">
+                    <i class="fa fa-book"></i>
+                    <span>Buku Besar</span>
+                </a>
+            </li>
         </ul>
         <?php endif; ?>
     </section>

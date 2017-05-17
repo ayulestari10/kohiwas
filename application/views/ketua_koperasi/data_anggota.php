@@ -2,7 +2,7 @@
     <section class="content-header">
         <h1>
             Data Anggota
-            <small style="font-size: 14px;"><a href="<?= base_url('ketua_koperasi/dataAnggota') ?>"><i class="fa fa-download"></i> Cetak</a></small>
+            <small style="font-size: 14px;"><a href="<?= base_url('ketua_koperasi/cetakAnggota') ?>"><i class="fa fa-download"></i> Cetak</a></small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<?= base_url('admin') ?>"><i class="fa fa-dashboard"></i> Home</a></li>

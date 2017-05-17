@@ -19,20 +19,20 @@
 
         .logoo{
             margin-top: -210px;
-            width: 150px;
-            height: 170px;
+            width: 100px;
+            height: 70px;
             margin-left: 5px;
             margin-right: 40px; 
         }
         .logoo img{
-            width: 130px;
-            height: 80px;
+            width: 100px;
+            height: 50px;
         }
         .title{
             margin: 0 auto;
-            margin-top: -130px;
+            margin-top: -80px;
             width: 600px;
-            font-size: 20px;
+            font-size: 18px;
         }
         table,th,td{
             border: 1px solid black;
@@ -56,6 +56,9 @@
             padding-left: 10px; 
             text-align: center;
         }
+        #logo2{
+            padding-left: 1000px;
+        }
 	</style>
 </head>
 <body style="margin-top: 250px;">
@@ -72,12 +75,12 @@
                     DINAS PENDIDIKAN KABUPATEN OKU  
 				</strong>
 			</div>
-            <div class="logoo" style="margin-left:1000px; margin-top: -120px;">
-                <img src="<?= base_url('') ?>assets/img/oku.png" width="130" height="80">
+            <div class="logoo" id="logo2" style="margin-top: -80px;">
+                <!-- <img src="<?= base_url('') ?>assets/img/oku.png" width="70" height="100"> -->
             </div>
 		</div>
 		<div class="content" style="margin: 0 auto; width:100%;">
-			<p style="margin-top: 50px; width: 100%; font-weight: bold; font-size: 22px; text-align: center; margin-bottom: 30px;">Laporan Data Simpanan</p>
+			<p style="margin-top: 50px; width: 100%; font-weight: bold; font-size: 18px; text-align: center; margin-bottom: 30px;">Laporan Data Simpanan</p>
             <table style="width: 100%;">
 				<tr>
                     <th>No</th>

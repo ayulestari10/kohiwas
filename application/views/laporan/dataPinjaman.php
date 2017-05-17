@@ -64,40 +64,46 @@
 <body style="margin-top: 250px;">
 	<div id="bigWrapper">
 		<div id="header">
-            <div class="logoo">
-                <img src="<?= base_url('') ?>assets/img/logo.jpg">
-            </div>
+			<div class="logoo">
+				<img src="<?= base_url('') ?>assets/img/logo.jpg">
+			</div>
 
-            <div class="title">
-                <strong>
-                    PENGURUS DAN BADAN PENGAWAS<br> 
+			<div class="title">
+				<strong>
+					PENGURUS DAN BADAN PENGAWAS<br> 
                     KOPERASI HIMPUNAN PENGAWAS (KOHIWAS) <br>
                     DINAS PENDIDIKAN KABUPATEN OKU  
-                </strong>
-            </div>
+				</strong>
+			</div>
             <div class="logoo" id="logo2" style="margin-top: -80px;">
                 <!-- <img src="<?= base_url('') ?>assets/img/oku.png" width="70" height="100"> -->
             </div>
-        </div>
-        <div class="content" style="margin: 0 auto; width:100%;">
-            <p style="margin-top: 50px; width: 100%; font-weight: bold; font-size: 18px; text-align: center; margin-bottom: 30px;">Laporan Data Anggota</p>
+		</div>
+		<div class="content" style="margin: 0 auto; width:100%;">
+			<p style="margin-top: 50px; width: 100%; font-weight: bold; font-size: 18px; text-align: center; margin-bottom: 30px;">Laporan Data Simpanan</p>
             <table style="width: 100%;">
 				<tr>
                     <th>No</th>
-                    <th>NLP</th>
-                    <th>Nama</th>
-                    <th>Tanggal Mendaftar</th>
-                    <th>Alamat</th>
-                    <th>Simpanan Pokok</th>
+                    <th>Nama Anggota</th>
+                    <th>Tanggal Pinjaman</th>
+                    <th>Jumlah Pinjaman</th>
+                    <th>Bunga</th>
+                    <th>TTL Pinjaman</th>
+                    <th>Lama Pinjaman</th>
+                    <th>Angsuran</th>
+                    <th>Status</th>
                 </tr>
-                <?php $i = 0; foreach ($anggota as $row): ?>
+               <?php $i = 0; foreach ($pinjaman as $row): ?>
                 <tr>
                     <td><?= ++$i ?></td>
-                    <td><?= $row->nlp ?></td>
-                    <td><?= $row->nama ?></td>
-                    <td><?= $row->tgl_mendaftar ?></td>
-                    <td><?= $row->alamat ?></td>
-                    <td><?= "Rp " . number_format($row->simpanan_pokok,2,',','.') ?></td>
+                    <td><?= $this->anggota_m->get_row(['id_anggota' => $row->id_anggota])->nama ?></td>
+                    <td><?= $row->tgl_pinjaman ?></td>
+                    <td><?= "Rp " . number_format($row->jlh_pinjaman,2,',','.') ?></td>
+                    <td><?= "Rp " . number_format($row->bunga,2,',','.') ?></td>
+                    <td><?= $row->ttl_pinjaman ?></td>
+                    <td><?= $row->lama_pinjaman ?></td>
+                    <td><?= $row->angsuran ?></td>
+                    <td><?= $row->status ?></td>
                 </tr>
                 <?php endforeach; ?>
 			</table>

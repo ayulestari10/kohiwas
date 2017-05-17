@@ -1,8 +1,8 @@
 <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Data Pinjaman <button class="btn btn-success" data-toggle="modal" data-target="#add"><i class="fa fa-plus"></i></button>
-            <small></small>
+            Data Pinjaman 
+            <small style="font-size: 14px;"><a href="<?= base_url('ketua_koperasi/cetakPinjaman') ?>"><i class="fa fa-download"></i> Cetak</a></small>
         </h1>
         <ol class="breadcrumb">
 
@@ -32,7 +32,6 @@
                                 <th>Lama Pinjaman</th>
                                 <th>Angsuran</th>
                                 <th>Status</th>
-                                <th></th>
                             </tr>
                            <?php $i = 0; foreach ($pinjaman as $row): ?>
                             <tr>
@@ -45,10 +44,6 @@
                                 <td><?= $row->lama_pinjaman ?></td>
                                 <td><?= $row->angsuran ?></td>
                                 <td><?= $row->status ?></td>
-                                <td>
-                                    <button class="btn btn-info" data-toggle="modal" data-target="#edit" onclick="get_pinjaman(<?= $row->id_pinjaman ?>)"><i class="fa fa-pencil"></i></button>
-                                    <button class="btn btn-danger" onclick="delete_pinjaman(<?= $row->id_pinjaman ?>)"><i class="fa fa-trash-o"></i></button>
-                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </table>
@@ -57,150 +52,3 @@
             </div>
         </div>
     </section>
-
-    <div class="modal fade" tabindex="-1" role="dialog" id="add">
-      <div class="modal-dialog" role="document">
-        <?= form_open('admin/data_pinjaman') ?>
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Tambah Data Pinjaman</h4>
-          </div>
-          <div class="modal-body">
-                <div class="form-group">
-                    <label for="Nama Anggota">Nama Anggota *</label>
-                    <select class="form-control" name="id_anggota">
-                        <?php foreach ($anggota as $row): ?>
-                            <option value="<?= $row->id_anggota ?>"><?= $row->nama ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="Tanggal Pinjaman">Tanggal Pinjaman *</label>
-                    <input type="text" class="form-control" name="tgl_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Jumlah Pinjaman">Jumlah Pinjaman *</label>
-                    <input type="text" class="form-control" name="jlh_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Bunga">Bunga *</label>
-                    <input type="text" class="form-control" name="bunga" required>
-                </div>
-                <div class="form-group">
-                    <label for="TTL Pinjaman">TTL Pinjaman *</label>
-                    <input type="text" class="form-control" name="ttl_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Lama Pinjaman">Lama Pinjaman *</label>
-                    <input type="text" class="form-control" name="lama_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Angsuran">Angsuran *</label>
-                    <input type="text" class="form-control" name="angsuran" required>
-                </div>
-                <div class="form-group">
-                    <label for="Status">Status *</label>
-                    <input type="text" class="form-control" name="status" required>
-                </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-            <input type="submit" name="simpan" value="Simpan" class="btn btn-primary">
-          </div>
-          <?= form_close() ?>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-    <div class="modal fade" tabindex="-1" role="dialog" id="edit">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-        <?= form_open('admin/data_pinjaman') ?>
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Edit Data Pinjaman</h4>
-          </div>
-          <div class="modal-body">
-                <input type="hidden" name="edit_id_pinjaman" id="edit_id_pinjaman">
-                <div class="form-group">
-                    <label for="Nama Anggota">Nama Anggota *</label>
-                    <div id="edit_id_anggota"></div>
-                </div>
-                <div class="form-group">
-                    <label for="Tanggal Pinjaman">Tanggal Pinjaman *</label>
-                    <input type="text" class="form-control" name="edit_tgl_pinjaman" id="edit_tgl_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Jumlah Pinjaman">Jumlah Pinjaman *</label>
-                    <input type="text" class="form-control" name="edit_jlh_pinjaman" id="edit_jlh_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Bunga">Bunga *</label>
-                    <input type="text" class="form-control" name="edit_bunga" id="edit_bunga" required>
-                </div>
-                <div class="form-group">
-                    <label for="TTL Pinjaman">TTL Pinjaman *</label>
-                    <input type="text" class="form-control" name="edit_ttl_pinjaman" id="edit_ttl_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Lama Pinjaman">Lama Pinjaman *</label>
-                    <input type="text" class="form-control" name="edit_lama_pinjaman" id="edit_lama_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Angsuran">Angsuran *</label>
-                    <input type="text" class="form-control" name="edit_angsuran" id="edit_angsuran" required>
-                </div>
-                <div class="form-group">
-                    <label for="Status">Status *</label>
-                    <input type="text" class="form-control" name="edit_status" id="edit_status" required>
-                </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-            <input type="submit" name="edit" value="Edit" class="btn btn-primary">
-          </div>
-          <?= form_close() ?>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-    <script type="text/javascript">
-        function get_pinjaman(id_pinjaman) {
-            $.ajax({
-                url: '<?= base_url('admin/data_pinjaman') ?>',
-                type: 'POST',
-                data: {
-                    id_pinjaman: id_pinjaman,
-                    get: true
-                },
-                success: function(response) {
-                    console.log(response);
-                    response = JSON.parse(response);
-                    $('#edit_id_pinjaman').val(response.id_pinjaman);
-                    $('#edit_id_anggota').html(response.dropdown);
-                    $('#edit_tgl_pinjaman').val(response.tgl_pinjaman);
-                    $('#edit_jlh_pinjaman').val(response.jlh_pinjaman);
-                    $('#edit_bunga').val(response.bunga);
-                    $('#edit_ttl_pinjaman').val(response.ttl_pinjaman);
-                    $('#edit_lama_pinjaman').val(response.lama_pinjaman);
-                    $('#edit_angsuran').val(response.angsuran);
-                    $('#edit_status').val(response.status);
-                }
-            });
-        }
-
-        function delete_pinjaman(id_pinjaman) {
-            $.ajax({
-                url: '<?= base_url('admin/data_pinjaman') ?>',
-                type: 'POST',
-                data: {
-                    id_pinjaman: id_pinjaman,
-                    delete: true
-                },
-                success: function() {
-                    window.location = '<?= base_url('admin/data_pinjaman') ?>';
-                }
-            });   
-        }
-    </script>

@@ -51,9 +51,45 @@ class Ketua_koperasi extends MY_Controller{
 		$this->template($this->data);
 	}
 
+	public function data_pinjaman(){
+		$this->data['title'] 	= "Data Pinjaman | KOHIWAS";
+		$this->data['content']	= "ketua_koperasi/data_pinjaman";
+		$this->data['anggota']	= $this->anggota_m->get_by_order('id_anggota', 'DESC');
+		$this->data['pinjaman']	= $this->pinjaman_m->get_by_order('id_pinjaman', 'DESC');
+		$this->template($this->data);
+	}
+
+	public function data_angsuran(){
+		$this->data['title'] 	= "Data Angsuran | KOHIWAS";
+		$this->data['content']	= "ketua_koperasi/data_angsuran";
+		$this->data['angsuran']	= $this->angsuran_m->get_by_order('id_angsuran', 'DESC');
+		$this->data['pinjaman']	= $this->pinjaman_m->get_by_order('id_pinjaman', 'DESC');
+		$this->template($this->data);
+	}
+
+	public function data_jurnal(){
+		$this->data['title'] 	= "Jurnal Umum | KOHIWAS";
+		$this->data['content']	= "ketua_koperasi/jurnal";
+		$this->data['angsuran']	= $this->angsuran_m->get_by_order('id_angsuran', 'DESC');
+		$this->data['pinjaman']	= $this->pinjaman_m->get_by_order('id_pinjaman', 'DESC');
+		$this->template($this->data);	
+	}
+
+	public function data_bukuBesar(){
+		$this->data['title'] 	= "Buku Besar | KOHIWAS";
+		$this->data['content']	= "ketua_koperasi/buku_besar";
+		$this->data['angsuran']	= $this->angsuran_m->get_by_order('id_angsuran', 'DESC');
+		$this->data['pinjaman']	= $this->pinjaman_m->get_by_order('id_pinjaman', 'DESC');
+		$this->template($this->data);	
+	}
+
 	public function cetakAnggota(){
 		$this->data['anggota']	= $this->anggota_m->get_by_order('id_anggota', 'DESC');
-		$this->load->view('laporan/dataAnggota', $this->data);
+		$html = $this->load->view('laporan/dataAnggota', $this->data, true);
+		$pdfFilePath = 'Laporan Data Anggota.pdf';
+    	$this->load->library('m_pdf');
+    	$this->m_pdf->pdf->WriteHTML($html);
+    	$this->m_pdf->pdf->Output($pdfFilePath, "D");
 	}
 
 	public function cetakSimpanan(){
@@ -62,6 +98,27 @@ class Ketua_koperasi extends MY_Controller{
 		
 		$html = $this->load->view('laporan/dataSimpanan', $this->data, true);
     	$pdfFilePath = 'Laporan Data Simpanan.pdf';
+    	$this->load->library('m_pdf');
+    	$this->m_pdf->pdf->WriteHTML($html);
+    	$this->m_pdf->pdf->Output($pdfFilePath, "D");	
+	}
+
+	public function cetakPinjaman(){
+		$this->data['anggota']	= $this->anggota_m->get_by_order('id_anggota', 'DESC');
+		$this->data['pinjaman']	= $this->pinjaman_m->get_by_order('id_pinjaman', 'DESC');
+		$html = $this->load->view('laporan/dataPinjaman', $this->data, true);
+    	$pdfFilePath = 'Laporan Data Pinjaman.pdf';
+    	$this->load->library('m_pdf');
+    	$this->m_pdf->pdf->WriteHTML($html);
+    	$this->m_pdf->pdf->Output($pdfFilePath, "D");		
+	}
+
+	public function cetakAngsuran(){
+		$this->data['angsuran']	= $this->angsuran_m->get_by_order('id_angsuran', 'DESC');
+		$this->data['pinjaman']	= $this->pinjaman_m->get_by_order('id_pinjaman', 'DESC');
+
+		$html = $this->load->view('laporan/dataAngsuran', $this->data, true);
+    	$pdfFilePath = 'Laporan Data Pinjaman.pdf';
     	$this->load->library('m_pdf');
     	$this->m_pdf->pdf->WriteHTML($html);
     	$this->m_pdf->pdf->Output($pdfFilePath, "D");	
