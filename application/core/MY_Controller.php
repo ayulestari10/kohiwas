@@ -13,10 +13,7 @@ class MY_Controller extends CI_Controller
 	public function template($data, $template = 'admin')
 	{
 	    if ($template == 'admin') {
-	      return $this->load->view('admin/template/layout', $data);
-	    }
-	    elseif ($template == 'operator') {
-	      return $this->load->view('operator_unit/template/layout', $data);
+	      return $this->load->view('template/layout', $data);
 	    }
 	}
 

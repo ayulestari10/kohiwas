@@ -14,7 +14,7 @@ class Login extends MY_Controller
 			switch ($this->data['id_role'])
 			{
 				case 1:
-					redirect('ketua_operasi');
+					redirect('ketua_koperasi');
 					break;
 				case 2:
 					redirect('admin');

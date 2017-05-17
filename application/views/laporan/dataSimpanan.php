@@ -2,47 +2,99 @@
 <html>
 <head>
 	<title></title>
-	<link rel="stylesheet" type="text/css" href="<?= base_url('') ?>assets/css/customStyle.css">
+	<style type="text/css">
+        #bigWrapper{
+            width: 100%;
+        }
+        #header{
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 50px;
+            border-bottom: 5px double black;
+            padding-bottom: 15px;
+            width: 1332px;
+            margin: 0 auto;
+            height: 100px;
+        }
+
+        .logoo{
+            margin-top: -210px;
+            width: 150px;
+            height: 170px;
+            margin-left: 5px;
+            margin-right: 40px; 
+        }
+        .logoo img{
+            width: 130px;
+            height: 80px;
+        }
+        .title{
+            margin: 0 auto;
+            margin-top: -130px;
+            width: 600px;
+            font-size: 20px;
+        }
+        table,th,td{
+            border: 1px solid black;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2
+        }
+        tr:first-child{
+            width: 40px;
+        }
+        th{
+            background-color: #4CAF50;
+            color: white;
+            /*min-width: 100px;*/
+        }
+        td{
+            padding: 2px;
+            padding-left: 10px; 
+            text-align: center;
+        }
+	</style>
 </head>
-<body >
+<body style="margin-top: 250px;">
 	<div id="bigWrapper">
-		<div class="header">
-			<div class="logo">
-				<img src="<?= base_url('') ?>assets/logo/logoo.jpg">
+		<div id="header">
+			<div class="logoo">
+				<img src="<?= base_url('') ?>assets/img/logo.jpg">
 			</div>
 
 			<div class="title">
 				<strong>
-					PERUSAHAAN KOMUNITAS HIMPUNAN PENGAWAS </br>
-					"KOHIWAS"
+					PENGURUS DAN BADAN PENGAWAS<br> 
+                    KOPERASI HIMPUNAN PENGAWAS (KOHIWAS) <br>
+                    DINAS PENDIDIKAN KABUPATEN OKU  
 				</strong>
-				<div class="kontak">
-					Jalan Merdeka No. 123 Serasan Jaya Sekayu Kabupaten. Musi Banyuasin Sumatera Selatan</br>
-							Telp 0714-321628 Fax. 0714-321341</br>
-							Email info@pdam-tirtarandik.com</br>
-				</div>
 			</div>
-			<hr>
-			<hr style="margin-top: -13px;">	
+            <div class="logoo" style="margin-left:1000px; margin-top: -120px;">
+                <img src="<?= base_url('') ?>assets/img/oku.png" width="130" height="80">
+            </div>
 		</div>
-		<div class="content">
-			<strong style="font-size: 22px;">Laporan Data Simpanan</strong>
-			<table style="margin-top: 10px;">
+		<div class="content" style="margin: 0 auto; width:100%;">
+			<p style="margin-top: 50px; width: 100%; font-weight: bold; font-size: 22px; text-align: center; margin-bottom: 30px;">Laporan Data Simpanan</p>
+            <table style="width: 100%;">
 				<tr>
-                    <th style="min-width: 50px;">No</th>
-                    <th style="min-width: 100px;">ID Anggota</th>
-                    <th style="min-width: 100px;">ID Simpanan</th>
-                    <th style="min-width: 200px;">Tanggal Simpanan</th>
-                    <th style="min-width: 200px;">Simpanan Wajib</th>
-                    <th style="min-width: 200px;">Simpanan Sukarela</th>
+                    <th>No</th>
+                    <th>Nama Anggota</th>
+                    <th>Tanggal Simpanan</th>
+                    <th>Simpanan Wajib</th>
+                    <th>Simpanan Sukarela</th>
                 </tr>
+                <?php $i = 0; foreach($simpanan as $row): ?>
                 <tr>
-                    <td>1</td>
-                    <td>01</td>
-                    <td>001</td>
-                    <td>1-01-2017</td>
-                    <td>2.000.000</td>
-                    <td>2.000.000</td>
+                    <td><?= ++$i ?></td>
+                    <td><?= $this->anggota_m->get_row(['id_anggota' => $row->id_anggota])->nama ?></td>
+                    <td><?= $row->tgl_simpanan ?></td>
+                    <td><?= "Rp " . number_format($row->simpanan_wajib,2,',','.') ?></td>
+                    <td><?= "Rp " . number_format($row->simpanan_sukarela,2,',','.') ?></td>
+                </tr>
+                <?php endforeach; ?>
 			</table>
 		</div>
 	</div>

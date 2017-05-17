@@ -23,6 +23,20 @@ class Admin extends MY_Controller{
 	public function index()
 	{
 		$this->load->model('anggota_m');
+        $this->load->model('angsuran_m');
+        $this->load->model('pinjaman_m');
+        $this->load->model('simpanan_m');
+        $this->data['title']        = 'Admin';
+        $this->data['content']      = 'admin/dashboard'; 
+        $this->data['anggota']   	= $this->anggota_m->get();
+        $this->data['angsuran']     = $this->angsuran_m->get();
+        $this->data['pinjaman']     = $this->pinjaman_m->get();
+        $this->data['simpanan']   	= $this->simpanan_m->get();
+        $this->template($this->data,'admin');	
+	}
+
+	public function data_anggota(){
+		$this->load->model('anggota_m');
 		
 		if ($this->POST('simpan'))
 		{
