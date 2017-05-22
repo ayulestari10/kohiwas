@@ -68,7 +68,11 @@
                 </div>
                 <div class="form-group">
                     <label for="Tanggal Angsuran">Tanggal Angsuran *</label>
-                    <input type="text" class="form-control" name="tgl_angsuran" required>
+                    <!-- <input type="text" class="form-control" name="tgl_angsuran" required> -->
+                    <div class="input-group date">
+                          <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                          <input type="text" name="tgl_angsuran" id="tgl_awal" class="form-control" placeholder="YYYY-MM-DD" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="Jumlah dibayar">Jumlah dibayar *</label>
@@ -104,7 +108,11 @@
                 </div>
                 <div class="form-group">
                     <label for="Tanggal Angsuran">Tanggal Angsuran *</label>
-                    <input type="text" class="form-control" name="edit_tgl_angsuran" id="edit_tgl_angsuran" required>
+                    <!-- <input type="text" class="form-control" name="edit_tgl_angsuran" id="edit_tgl_angsuran" required> -->
+                    <div class="input-group date">
+                          <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                          <input type="text" name="tgl_angsuran" id="tgl_awal" class="form-control" placeholder="YYYY-MM-DD" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="Jumlah dibayar">Jumlah dibayar *</label>
@@ -124,6 +132,10 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
     <script type="text/javascript">
+         $(document).ready(function() {
+            $('.input-group.date').datepicker({format: "yyyy-mm-dd"});
+        });
+
         function get_angsuran(id_angsuran) {
             $.ajax({
                 url: '<?= base_url('admin/data_angsuran') ?>',

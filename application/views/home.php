@@ -8,6 +8,7 @@
     <link href="<?= base_url('') ?>assets/AdminLTE/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <!-- font Awesome -->
     <link href="<?= base_url('') ?>assets/AdminLTE/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" type="text/css" href="<?= base_url('assets/img/logo.jpg') ?>">
 	<script src="http://mymaplist.com/js/vendor/TweenLite.min.js"></script>
 	<style type="text/css">
 	    body {

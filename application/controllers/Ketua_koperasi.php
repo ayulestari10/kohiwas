@@ -24,6 +24,8 @@ class Ketua_koperasi extends MY_Controller{
         $this->load->model('angsuran_m');
         $this->load->model('pinjaman_m');
         $this->load->model('simpanan_m');
+        $this->load->model('jurnal_umum_m');
+        $this->load->model('buku_besar_m');
 	}
 
 	public function index(){
@@ -68,18 +70,16 @@ class Ketua_koperasi extends MY_Controller{
 	}
 
 	public function data_jurnal(){
-		$this->data['title'] 	= "Jurnal Umum | KOHIWAS";
-		$this->data['content']	= "ketua_koperasi/jurnal";
-		$this->data['angsuran']	= $this->angsuran_m->get_by_order('id_angsuran', 'DESC');
-		$this->data['pinjaman']	= $this->pinjaman_m->get_by_order('id_pinjaman', 'DESC');
+		$this->data['title'] 		= "Jurnal Umum | KOHIWAS";
+		$this->data['content']		= "ketua_koperasi/jurnal";
+		$this->data['jurnal_umum']	= $this->jurnal_umum_m->get_by_order('id_jurnal', 'DESC');
 		$this->template($this->data);	
 	}
 
 	public function data_bukuBesar(){
 		$this->data['title'] 	= "Buku Besar | KOHIWAS";
 		$this->data['content']	= "ketua_koperasi/buku_besar";
-		$this->data['angsuran']	= $this->angsuran_m->get_by_order('id_angsuran', 'DESC');
-		$this->data['pinjaman']	= $this->pinjaman_m->get_by_order('id_pinjaman', 'DESC');
+		$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('id_buku_besar', 'DESC');
 		$this->template($this->data);	
 	}
 
@@ -119,6 +119,26 @@ class Ketua_koperasi extends MY_Controller{
 
 		$html = $this->load->view('laporan/dataAngsuran', $this->data, true);
     	$pdfFilePath = 'Laporan Data Pinjaman.pdf';
+    	$this->load->library('m_pdf');
+    	$this->m_pdf->pdf->WriteHTML($html);
+    	$this->m_pdf->pdf->Output($pdfFilePath, "D");	
+	}
+
+	public function cetakJurnal(){
+		$this->data['jurnal_umum']	= $this->jurnal_umum_m->get_by_order('id_jurnal', 'DESC');
+
+		$html = $this->load->view('laporan/dataJurnalUmum', $this->data, true);
+    	$pdfFilePath = 'Jurnal Umum.pdf';
+    	$this->load->library('m_pdf');
+    	$this->m_pdf->pdf->WriteHTML($html);
+    	$this->m_pdf->pdf->Output($pdfFilePath, "D");
+	}
+
+	public function cetakBukuBesar(){
+		$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('id_buku_besar', 'DESC');
+
+		$html = $this->load->view('laporan/dataBukuBesar', $this->data, true);
+    	$pdfFilePath = 'Buku Besar.pdf';
     	$this->load->library('m_pdf');
     	$this->m_pdf->pdf->WriteHTML($html);
     	$this->m_pdf->pdf->Output($pdfFilePath, "D");	

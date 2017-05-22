@@ -78,7 +78,7 @@
             <li>
                 <a href="<?= base_url('ketua_koperasi/data_jurnal') ?>">
                     <i class="fa fa-book"></i>
-                    <span>Jurnal</span>
+                    <span>Jurnal Umum</span>
                 </a>
             </li>
             <li>

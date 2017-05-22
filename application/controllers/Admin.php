@@ -115,9 +115,64 @@ class Admin extends MY_Controller{
 				$this->flashmsg('Anda harus mengisi form dengan benar', 'danger');
 				redirect('admin/data_simpanan');
 				exit;	
-			}
-			
+			}	
+
+			$this->load->model('jurnal_umum_m');
+			$this->data['entri1'] = [
+				'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
+				'ket'			=> 'Kas Simpanan Wajib',
+				'debit'			=> $this->data['simpanan']['simpanan_wajib'],
+				'kredit'		=> $this->data['simpanan']['simpanan_wajib'],
+			];
+
+			$this->data['entri2'] = [
+				'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
+				'ket'			=> 'Kas Simpanan Sukarela',
+				'debit'			=> $this->data['simpanan']['simpanan_sukarela'],
+				'kredit'		=> $this->data['simpanan']['simpanan_sukarela'],
+			];
+
 			$this->simpanan_m->insert($this->data['simpanan']);
+			$this->jurnal_umum_m->insert($this->data['entri1']);
+			$this->jurnal_umum_m->insert($this->data['entri2']);
+			
+			$this->load->model('buku_besar_m');
+
+			$cek = $this->buku_besar_m->get_last_row();
+
+			if(!isset($cek)){
+				$saldo_debit1 	= $this->POST('simpanan_wajib');
+				$saldo_debit2	= $this->POST('simpanan_sukarela');
+			}
+			if(isset($cek)){
+				$last_saldo_debit 	= $this->buku_besar_m->get_last_row()->saldo_debit;
+				$saldo_debit1 		= $this->POST('simpanan_wajib') + $last_saldo_debit;
+				$saldo_debit2 		= $this->POST('simpanan_sukarela') + $saldo_debit1;
+			}
+
+			$this->data['entri3'] = [
+				'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
+				'ket'			=> 'Simpanan Wajib',
+				'ref'			=> '103',
+				'debit'			=> $this->data['simpanan']['simpanan_wajib'],
+				'kredit'		=> 0,
+				'saldo_debit'	=> $saldo_debit1,
+				'saldo_kredit'	=> 0 
+			];
+			
+			$this->data['entri4'] = [
+				'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
+				'ket'			=> 'Simpanan Sukarela',
+				'ref'			=> '104',
+				'debit'			=> $this->data['simpanan']['simpanan_sukarela'],
+				'kredit'		=> 0,
+				'saldo_debit'	=> $saldo_debit2,
+				'saldo_kredit'	=> 0
+			];
+
+			$this->buku_besar_m->insert($this->data['entri3']);
+			$this->buku_besar_m->insert($this->data['entri4']);
+			
 			$this->flashmsg('Data simpanan berhasil disimpan');
 			redirect('admin/data_simpanan');
 			exit;
@@ -188,7 +243,41 @@ class Admin extends MY_Controller{
 				exit;	
 			}
 			
+			$this->load->model('jurnal_umum_m');
+			$this->data['entri1'] = [
+				'tgl'			=> $this->data['pinjaman']['tgl_pinjaman'],
+				'ket'			=> 'Pinjaman',
+				'debit'			=> 0,
+				'kredit'		=> $this->data['pinjaman']['jlh_pinjaman'],
+			];
+
 			$this->pinjaman_m->insert($this->data['pinjaman']);
+			$this->jurnal_umum_m->insert($this->data['entri1']);
+			
+			$this->load->model('buku_besar_m');
+
+			$cek = $this->buku_besar_m->get_last_row();
+
+			if(!isset($cek)){
+				$saldo_kredit 	= $this->POST('jlh_pinjaman');
+			}
+			if(isset($cek)){
+				$last_saldo_debit 	= $this->buku_besar_m->get_last_row()->saldo_debit;
+				$saldo_debit		= $last_saldo_debit - $this->POST('jlh_pinjaman');
+			}
+
+			$this->data['entri2'] = [
+				'tgl'			=> $this->data['pinjaman']['tgl_pinjaman'],
+				'ket'			=> 'Pinjaman',
+				'ref'			=> '105',
+				'debit'			=> 0,
+				'kredit'		=> $this->data['pinjaman']['jlh_pinjaman'],
+				'saldo_debit'	=> $saldo_debit,
+				'saldo_kredit'	=> 0 
+			];
+			
+			$this->buku_besar_m->insert($this->data['entri2']);
+
 			$this->flashmsg('Data pinjaman berhasil disimpan');
 			redirect('admin/data_pinjaman');
 			exit;
@@ -258,8 +347,42 @@ class Admin extends MY_Controller{
 				redirect('admin/data_angsuran');
 				exit;	
 			}
-			
+
+			$this->load->model('jurnal_umum_m');
+			$this->data['entri1'] = [
+				'tgl'			=> $this->data['angsuran']['tgl_angsuran'],
+				'ket'			=> 'Angsuran',
+				'debit'			=> $this->data['angsuran']['jlh_dibayar'],
+				'kredit'		=> 0,
+			];
+
 			$this->angsuran_m->insert($this->data['angsuran']);
+			$this->jurnal_umum_m->insert($this->data['entri1']);
+			
+			$this->load->model('buku_besar_m');
+
+			$cek = $this->buku_besar_m->get_last_row();
+
+			if(!isset($cek)){
+				$saldo_debit 	= $this->POST('jlh_dibayar');
+			}
+			if(isset($cek)){
+				$last_saldo_debit 	= $this->buku_besar_m->get_last_row()->saldo_debit;
+				$saldo_debit		= $last_saldo_debit + $this->POST('jlh_dibayar');
+			}
+
+			$this->data['entri2'] = [
+				'tgl'			=> $this->data['angsuran']['tgl_angsuran'],
+				'ket'			=> 'Angsuran',
+				'ref'			=> '106',
+				'debit'			=> $this->data['angsuran']['jlh_dibayar'],
+				'kredit'		=> 0,
+				'saldo_debit'	=> $saldo_debit,
+				'saldo_kredit'	=> 0 
+			];
+			
+			$this->buku_besar_m->insert($this->data['entri2']);
+
 			$this->flashmsg('Data angsuran berhasil disimpan');
 			redirect('admin/data_angsuran');
 			exit;
