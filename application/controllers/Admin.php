@@ -51,13 +51,13 @@ class Admin extends MY_Controller{
 			if (!$this->anggota_m->required_input(array_keys($this->data['anggota'])))
 			{
 				$this->flashmsg('Anda harus mengisi form dengan benar', 'danger');
-				redirect('admin');
+				redirect('admin/data_anggota');
 				exit;	
 			}
 			
 			$this->anggota_m->insert($this->data['anggota']);
 			$this->flashmsg('Data anggota berhasil disimpan');
-			redirect('admin');
+			redirect('admin/data_anggota');
 			exit;
 		}
 
@@ -73,7 +73,7 @@ class Admin extends MY_Controller{
 
 			$this->anggota_m->update($this->POST('edit_id_anggota'), $this->data['anggota']);
 			$this->flashmsg('Data anggota berhasil diperbarui');
-			redirect('admin');
+			redirect('admin/data_anggota');
 			exit;
 		}
 		
@@ -410,7 +410,7 @@ class Admin extends MY_Controller{
 			$temp = [];
 			foreach ($pinjaman as $row)
 				$temp[$row->id_pinjaman] = $row->id_pinjaman;
-			$this->data['angsuran']->dropdown = form_dropdown('edit_id_pinjaman', $temp, $this->data['angsuran']->id_angsuran, ['class' => 'form-control']);
+			$this->data['angsuran']->dropdown = form_dropdown('edit_id_pinjaman', $temp, $this->data['angsuran']->id_pinjaman, ['class' => 'form-control']);
 			echo json_encode($this->data['angsuran']);
 			exit;
 		}

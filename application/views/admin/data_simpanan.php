@@ -112,7 +112,7 @@
                     <!-- <input type="text" class="form-control" name="edit_tgl_simpanan" id="edit_tgl_simpanan" required> -->
                     <div class="input-group date">
                           <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-                          <input type="text" name="tgl_simpanan" id="tgl_awal" class="form-control" placeholder="YYYY-MM-DD" required>
+                          <input type="text" name="edit_tgl_simpanan" id="edit_tgl_simpanan" class="form-control" placeholder="YYYY-MM-DD" required>
                     </div>
                 </div>
                 <div class="form-group">

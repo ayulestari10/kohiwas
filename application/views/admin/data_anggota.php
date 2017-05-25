@@ -53,7 +53,7 @@
 
     <div class="modal fade" tabindex="-1" role="dialog" id="add">
       <div class="modal-dialog" role="document">
-        <?= form_open('admin') ?>
+        <?= form_open('admin/data_anggota') ?>
        <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -96,7 +96,7 @@
     <div class="modal fade" tabindex="-1" role="dialog" id="edit">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
-        <?= form_open('admin') ?>
+        <?= form_open('admin/data_anggota') ?>
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">Edit Data Anggota</h4>
@@ -143,7 +143,7 @@
 
         function get_anggota(id_anggota) {
             $.ajax({
-                url: '<?= base_url('admin') ?>',
+                url: '<?= base_url('admin/data_anggota') ?>',
                 type: 'POST',
                 data: {
                     id_anggota: id_anggota,
@@ -163,14 +163,14 @@
 
         function delete_anggota(id_anggota) {
             $.ajax({
-                url: '<?= base_url('admin') ?>',
+                url: '<?= base_url('admin/data_anggota') ?>',
                 type: 'POST',
                 data: {
                     id_anggota: id_anggota,
                     delete: true
                 },
                 success: function() {
-                    window.location = '<?= base_url('admin') ?>';
+                    window.location = '<?= base_url('admin/data_anggota') ?>';
                 }
             });   
         }
