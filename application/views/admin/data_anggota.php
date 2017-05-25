@@ -70,7 +70,10 @@
                 </div>
                 <div class="form-group">
                     <label for="Tanggal Mendaftar">Tanggal Mendaftar *</label>
-                    <input type="text" class="form-control" name="tgl_mendaftar" required>
+                    <div class="input-group date">
+                          <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                          <input type="text" name="tgl_mendaftar" id="tgl_mendaftar" class="form-control" placeholder="YYYY-MM-DD" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="Alamat">Alamat *</label>
@@ -110,7 +113,10 @@
                 </div>
                 <div class="form-group">
                     <label for="Tanggal Mendaftar">Tanggal Mendaftar *</label>
-                    <input type="text" class="form-control" name="edit_tgl_mendaftar" id="edit_tgl_mendaftar" required>
+                     <div class="input-group date">
+                          <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                          <input type="text" name="edit_tgl_mendaftar" id="edit_tgl_mendaftar" class="form-control" placeholder="YYYY-MM-DD" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="Alamat">Alamat *</label>
@@ -131,6 +137,10 @@
     </div><!-- /.modal -->
 
     <script type="text/javascript">
+         $(document).ready(function() {
+            $('.input-group.date').datepicker({format: "yyyy-mm-dd"});
+        });
+
         function get_anggota(id_anggota) {
             $.ajax({
                 url: '<?= base_url('admin') ?>',
