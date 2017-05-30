@@ -78,10 +78,6 @@
                     <label for="Jumlah dibayar">Jumlah dibayar *</label>
                     <input type="text" class="form-control" name="jlh_dibayar" required>
                 </div>
-                <div class="form-group">
-                    <label for="Sisa Angsuran">Sisa Angsuran *</label>
-                    <input type="text" class="form-control" name="sisa_angsuran" required>
-                </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
@@ -117,10 +113,6 @@
                 <div class="form-group">
                     <label for="Jumlah dibayar">Jumlah dibayar *</label>
                     <input type="text" class="form-control" name="edit_jlh_dibayar" id="edit_jlh_dibayar" required>
-                </div>
-                <div class="form-group">
-                    <label for="Sisa Angsuran">Sisa Angsuran *</label>
-                    <input type="text" class="form-control" name="edit_sisa_angsuran" id="edit_sisa_angsuran" required>
                 </div>
           </div>
           <div class="modal-footer">

@@ -334,19 +334,22 @@ class Admin extends MY_Controller{
 		
 		if ($this->POST('simpan'))
 		{
+			$cek_data_angsuran = $this->angsuran_m->get(['id_pinjaman' => $this->POST('id_pinjaman')]);
+			if(!$cek_data_angsuran){
+				$data_pinjaman = $this->pinjaman_m->get_row(['id_pinjaman' => $this->POST('id_pinjaman')]);
+				$sisa_angsuran = $data_pinjaman->jlh_pinjaman - $this->POST('jlh_dibayar');
+			}
+			else{
+				$data_angsuran2= $this->angsuran_m->get_by_order_limit('id_angsuran','DESC', ['id_pinjaman' => $this->POST('id_pinjaman')]);
+				$sisa_angsuran = $data_angsuran2->sisa_angsuran - $this->POST('jlh_dibayar');	
+			}
+
 			$this->data['angsuran'] = [
 				'id_pinjaman'		=> $this->POST('id_pinjaman'),
 				'tgl_angsuran'		=> $this->POST('tgl_angsuran'),
 				'jlh_dibayar'		=> $this->POST('jlh_dibayar'),
-				'sisa_angsuran'		=> $this->POST('sisa_angsuran')
+				'sisa_angsuran'		=> $sisa_angsuran
 			];
-			
-			if (!$this->angsuran_m->required_input(array_keys($this->data['angsuran'])))
-			{
-				$this->flashmsg('Anda harus mengisi form dengan benar', 'danger');
-				redirect('admin/data_angsuran');
-				exit;	
-			}
 
 			$this->load->model('jurnal_umum_m');
 			$this->data['entri1'] = [
