@@ -256,6 +256,7 @@ class Admin extends MY_Controller{
 
 			if(!isset($cek)){
 				$saldo_kredit 	= $this->POST('jlh_pinjaman');
+				$saldo_debit 	= 0;
 			}
 			if(isset($cek)){
 				$last_saldo_debit 	= $this->buku_besar_m->get_last_row()->saldo_debit;
