@@ -111,7 +111,7 @@
                     <!-- <input type="text" class="form-control" name="edit_tgl_angsuran" id="edit_tgl_angsuran" required> -->
                     <div class="input-group date">
                           <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-                          <input type="text" name="tgl_angsuran" id="tgl_awal" class="form-control" placeholder="YYYY-MM-DD" required>
+                          <input type="text" name="edit_tgl_angsuran" id="edit_tgl_angsuran" class="form-control" placeholder="YYYY-MM-DD" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -145,8 +145,8 @@
                     get: true
                 },
                 success: function(response) {
-                    console.log(response);
                     response = JSON.parse(response);
+                    console.log(response);
                     $('#edit_id_angsuran').val(response.id_angsuran);
                     $('#edit_id_pinjaman').html(response.dropdown);
                     $('#edit_tgl_angsuran').val(response.tgl_angsuran);
