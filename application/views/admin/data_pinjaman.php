@@ -41,10 +41,9 @@
                                 <td><?= $row->tgl_pinjaman ?></td>
                                 <td><?= "Rp " . number_format($row->jlh_pinjaman,2,',','.') ?></td>
                                 <td><?= "Rp " . number_format($row->bunga,2,',','.') ?></td>
-                                <td><?= $row->ttl_pinjaman ?></td>
+                                <td><?= "Rp " . number_format($row->ttl_pinjaman,2,',','.') ?></td>
                                 <td><?= $row->lama_pinjaman ?></td>
-                                <td><?= $row->angsuran ?></td>
-                                <td><?= $row->status ?></td>
+                                <td><?= "Rp " . number_format($row->angsuran,2,',','.') ?></td>
                                 <td>
                                     <button class="btn btn-info" data-toggle="modal" data-target="#edit" onclick="get_pinjaman(<?= $row->id_pinjaman ?>)"><i class="fa fa-pencil"></i></button>
                                     <button class="btn btn-danger" onclick="delete_pinjaman(<?= $row->id_pinjaman ?>)"><i class="fa fa-trash-o"></i></button>
@@ -88,24 +87,8 @@
                     <input type="text" class="form-control" name="jlh_pinjaman" required>
                 </div>
                 <div class="form-group">
-                    <label for="Bunga">Bunga *</label>
-                    <input type="text" class="form-control" name="bunga" required>
-                </div>
-                <div class="form-group">
-                    <label for="TTL Pinjaman">TTL Pinjaman *</label>
-                    <input type="text" class="form-control" name="ttl_pinjaman" required>
-                </div>
-                <div class="form-group">
                     <label for="Lama Pinjaman">Lama Pinjaman *</label>
                     <input type="text" class="form-control" name="lama_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Angsuran">Angsuran *</label>
-                    <input type="text" class="form-control" name="angsuran" required>
-                </div>
-                <div class="form-group">
-                    <label for="Status">Status *</label>
-                    <input type="text" class="form-control" name="status" required>
                 </div>
           </div>
           <div class="modal-footer">
@@ -144,24 +127,8 @@
                     <input type="text" class="form-control" name="edit_jlh_pinjaman" id="edit_jlh_pinjaman" required>
                 </div>
                 <div class="form-group">
-                    <label for="Bunga">Bunga *</label>
-                    <input type="text" class="form-control" name="edit_bunga" id="edit_bunga" required>
-                </div>
-                <div class="form-group">
-                    <label for="TTL Pinjaman">TTL Pinjaman *</label>
-                    <input type="text" class="form-control" name="edit_ttl_pinjaman" id="edit_ttl_pinjaman" required>
-                </div>
-                <div class="form-group">
                     <label for="Lama Pinjaman">Lama Pinjaman *</label>
                     <input type="text" class="form-control" name="edit_lama_pinjaman" id="edit_lama_pinjaman" required>
-                </div>
-                <div class="form-group">
-                    <label for="Angsuran">Angsuran *</label>
-                    <input type="text" class="form-control" name="edit_angsuran" id="edit_angsuran" required>
-                </div>
-                <div class="form-group">
-                    <label for="Status">Status *</label>
-                    <input type="text" class="form-control" name="edit_status" id="edit_status" required>
                 </div>
           </div>
           <div class="modal-footer">

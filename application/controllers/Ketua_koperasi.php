@@ -35,6 +35,8 @@ class Ketua_koperasi extends MY_Controller{
         $this->data['angsuran']     = $this->angsuran_m->get();
         $this->data['pinjaman']     = $this->pinjaman_m->get();
         $this->data['simpanan']   	= $this->simpanan_m->get();
+        $this->data['jurnal_umum']  = $this->jurnal_umum_m->get();
+        $this->data['buku_besar']   = $this->buku_besar_m->get();
         $this->template($this->data,'admin');	
 	}
 

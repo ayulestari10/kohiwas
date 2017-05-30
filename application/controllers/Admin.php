@@ -225,23 +225,19 @@ class Admin extends MY_Controller{
 		
 		if ($this->POST('simpan'))
 		{
+			$bunga 		= 0.01 * $this->POST('jlh_pinjaman');
+			$total 		= $bunga + $this->POST('jlh_pinjaman');
+			$angsuran 	= $total/$this->POST('lama_pinjaman');
+
 			$this->data['pinjaman'] = [
 				'id_anggota'		=> $this->POST('id_anggota'),
 				'tgl_pinjaman'		=> $this->POST('tgl_pinjaman'),
 				'jlh_pinjaman'		=> $this->POST('jlh_pinjaman'),
-				'bunga'				=> $this->POST('bunga'),
-				'ttl_pinjaman'		=> $this->POST('ttl_pinjaman'),
+				'bunga'				=> $bunga,
+				'ttl_pinjaman'		=> $total,
 				'lama_pinjaman'		=> $this->POST('lama_pinjaman'),
-				'angsuran'			=> $this->POST('angsuran'),
-				'status'			=> $this->POST('status')
+				'angsuran'			=> $angsuran
 			];
-
-			if (!$this->pinjaman_m->required_input(array_keys($this->data['pinjaman'])))
-			{
-				$this->flashmsg('Anda harus mengisi form dengan benar', 'danger');
-				redirect('admin/data_pinjaman');
-				exit;	
-			}
 			
 			$this->load->model('jurnal_umum_m');
 			$this->data['entri1'] = [
@@ -285,15 +281,18 @@ class Admin extends MY_Controller{
 
 		if ($this->POST('edit') && $this->POST('edit_id_pinjaman'))
 		{
+			$edit_bunga 	= 0.01 * $this->POST('edit_jlh_pinjaman');
+			$edit_total 	= $bunga + $this->POST('edit_jlh_pinjaman');
+			$edit_angsuran 	= $edit_total/$this->POST('edit_lama_pinjaman');
+
 			$this->data['pinjaman'] = [
 				'id_anggota'		=> $this->POST('edit_id_anggota'),
 				'tgl_pinjaman'		=> $this->POST('edit_tgl_pinjaman'),
 				'jlh_pinjaman'		=> $this->POST('edit_jlh_pinjaman'),
-				'bunga'				=> $this->POST('edit_bunga'),
-				'ttl_pinjaman'		=> $this->POST('edit_ttl_pinjaman'),
+				'bunga'				=> $edit_bunga,
+				'ttl_pinjaman'		=> $edit_total,
 				'lama_pinjaman'		=> $this->POST('edit_lama_pinjaman'),
-				'angsuran'			=> $this->POST('edit_angsuran'),
-				'status'			=> $this->POST('edit_status')
+				'angsuran'			=> $edit_angsuran
 			];
 
 			$this->pinjaman_m->update($this->POST('edit_id_pinjaman'), $this->data['pinjaman']);
