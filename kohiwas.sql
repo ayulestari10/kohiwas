@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.5.1
--- http://www.phpmyadmin.net
+-- version 4.6.5.2
+-- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 30, 2017 at 06:29 PM
--- Server version: 10.1.13-MariaDB
--- PHP Version: 7.0.8
+-- Generation Time: 06 Jun 2017 pada 18.56
+-- Versi Server: 10.1.21-MariaDB
+-- PHP Version: 5.6.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -23,7 +23,28 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `anggota`
+-- Struktur dari tabel `aktivitas`
+--
+
+CREATE TABLE `aktivitas` (
+  `id_aktivitas` int(11) NOT NULL,
+  `nama_aktivitas` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data untuk tabel `aktivitas`
+--
+
+INSERT INTO `aktivitas` (`id_aktivitas`, `nama_aktivitas`) VALUES
+(1, 'Simpanan'),
+(2, 'Pinjaman'),
+(3, 'Angsuran'),
+(4, 'Simpanan Sukarela');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `anggota`
 --
 
 CREATE TABLE `anggota` (
@@ -36,7 +57,7 @@ CREATE TABLE `anggota` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `anggota`
+-- Dumping data untuk tabel `anggota`
 --
 
 INSERT INTO `anggota` (`id_anggota`, `nlp`, `nama`, `tgl_mendaftar`, `alamat`, `simpanan_pokok`) VALUES
@@ -45,7 +66,7 @@ INSERT INTO `anggota` (`id_anggota`, `nlp`, `nama`, `tgl_mendaftar`, `alamat`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `angsuran`
+-- Struktur dari tabel `angsuran`
 --
 
 CREATE TABLE `angsuran` (
@@ -59,7 +80,7 @@ CREATE TABLE `angsuran` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `buku_besar`
+-- Struktur dari tabel `buku_besar`
 --
 
 CREATE TABLE `buku_besar` (
@@ -70,13 +91,26 @@ CREATE TABLE `buku_besar` (
   `debit` int(11) NOT NULL,
   `kredit` int(11) NOT NULL,
   `saldo_debit` int(11) NOT NULL,
-  `saldo_kredit` int(11) NOT NULL
+  `saldo_kredit` int(11) NOT NULL,
+  `id_aktivitas` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data untuk tabel `buku_besar`
+--
+
+INSERT INTO `buku_besar` (`id_buku_besar`, `tgl`, `ket`, `ref`, `debit`, `kredit`, `saldo_debit`, `saldo_kredit`, `id_aktivitas`) VALUES
+(17, '2017-06-05', 'Simpanan Wajib', '103', 1000000, 0, 7000000, 0, 1),
+(18, '2017-06-05', 'Simpanan Sukarela', '104', 1000000, 0, 8000000, 0, 4),
+(19, '2017-06-04', 'Simpanan Wajib', '103', 2000000, 0, 4000000, 0, 1),
+(20, '2017-06-04', 'Simpanan Sukarela', '104', 2000000, 0, 5000000, 0, 4),
+(21, '2017-06-03', 'Simpanan Wajib', '103', 1000000, 0, 1000000, 0, 1),
+(22, '2017-06-03', 'Simpanan Sukarela', '104', 1000000, 0, 2000000, 0, 4);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `jurnal_umum`
+-- Struktur dari tabel `jurnal_umum`
 --
 
 CREATE TABLE `jurnal_umum` (
@@ -84,13 +118,26 @@ CREATE TABLE `jurnal_umum` (
   `tgl` date NOT NULL,
   `ket` text NOT NULL,
   `debit` int(11) NOT NULL,
-  `kredit` int(11) NOT NULL
+  `kredit` int(11) NOT NULL,
+  `id_aktivitas` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data untuk tabel `jurnal_umum`
+--
+
+INSERT INTO `jurnal_umum` (`id_jurnal`, `tgl`, `ket`, `debit`, `kredit`, `id_aktivitas`) VALUES
+(19, '2017-06-05', 'Simpanan Wajib', 1000000, 1000000, 1),
+(20, '2017-06-05', 'Simpanan Sukarela', 1000000, 1000000, 4),
+(21, '2017-06-04', 'Simpanan Wajib', 2000000, 2000000, 1),
+(22, '2017-06-04', 'Simpanan Sukarela', 2000000, 2000000, 4),
+(23, '2017-06-03', 'Simpanan Wajib', 1000000, 1000000, 1),
+(24, '2017-06-03', 'Simpanan Sukarela', 1000000, 1000000, 4);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `log_login`
+-- Struktur dari tabel `log_login`
 --
 
 CREATE TABLE `log_login` (
@@ -100,10 +147,18 @@ CREATE TABLE `log_login` (
   `waktu` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data untuk tabel `log_login`
+--
+
+INSERT INTO `log_login` (`id_login`, `username`, `tanggal`, `waktu`) VALUES
+(1, 'azhary', '2017-06-05', '15:36:22'),
+(2, 'arliansyah', '2017-06-05', '15:37:43');
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `pinjaman`
+-- Struktur dari tabel `pinjaman`
 --
 
 CREATE TABLE `pinjaman` (
@@ -120,7 +175,7 @@ CREATE TABLE `pinjaman` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `role`
+-- Struktur dari tabel `role`
 --
 
 CREATE TABLE `role` (
@@ -129,7 +184,7 @@ CREATE TABLE `role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `role`
+-- Dumping data untuk tabel `role`
 --
 
 INSERT INTO `role` (`id_role`, `role`) VALUES
@@ -139,7 +194,7 @@ INSERT INTO `role` (`id_role`, `role`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `simpanan`
+-- Struktur dari tabel `simpanan`
 --
 
 CREATE TABLE `simpanan` (
@@ -150,10 +205,20 @@ CREATE TABLE `simpanan` (
   `simpanan_sukarela` int(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data untuk tabel `simpanan`
+--
+
+INSERT INTO `simpanan` (`id_simpanan`, `id_anggota`, `tgl_simpanan`, `simpanan_wajib`, `simpanan_sukarela`) VALUES
+(10, 2, '2017-06-05', 1000000, 1000000),
+(11, 2, '2017-06-04', 1000000, 1000000),
+(12, 2, '2017-06-03', 1000000, 1000000),
+(13, 2, '2017-06-04', 1000000, 1000000);
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user`
+-- Struktur dari tabel `user`
 --
 
 CREATE TABLE `user` (
@@ -163,16 +228,24 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `user`
+-- Dumping data untuk tabel `user`
 --
 
 INSERT INTO `user` (`username`, `id_role`, `password`) VALUES
 ('admin', 2, '202cb962ac59075b964b07152d234b70'),
+('arliansyah', 1, '985fabf8f96dc1c4c306341031569937'),
+('azhary', 2, '985fabf8f96dc1c4c306341031569937'),
 ('ketua', 1, '202cb962ac59075b964b07152d234b70');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `aktivitas`
+--
+ALTER TABLE `aktivitas`
+  ADD PRIMARY KEY (`id_aktivitas`);
 
 --
 -- Indexes for table `anggota`
@@ -191,13 +264,15 @@ ALTER TABLE `angsuran`
 -- Indexes for table `buku_besar`
 --
 ALTER TABLE `buku_besar`
-  ADD PRIMARY KEY (`id_buku_besar`);
+  ADD PRIMARY KEY (`id_buku_besar`),
+  ADD KEY `id_aktivitas` (`id_aktivitas`);
 
 --
 -- Indexes for table `jurnal_umum`
 --
 ALTER TABLE `jurnal_umum`
-  ADD PRIMARY KEY (`id_jurnal`);
+  ADD PRIMARY KEY (`id_jurnal`),
+  ADD KEY `id_aktivitas` (`id_aktivitas`);
 
 --
 -- Indexes for table `log_login`
@@ -236,6 +311,11 @@ ALTER TABLE `user`
 --
 
 --
+-- AUTO_INCREMENT for table `aktivitas`
+--
+ALTER TABLE `aktivitas`
+  MODIFY `id_aktivitas` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+--
 -- AUTO_INCREMENT for table `anggota`
 --
 ALTER TABLE `anggota`
@@ -244,7 +324,7 @@ ALTER TABLE `anggota`
 -- AUTO_INCREMENT for table `angsuran`
 --
 ALTER TABLE `angsuran`
-  MODIFY `id_angsuran` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_angsuran` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `buku_besar`
 --
@@ -254,17 +334,17 @@ ALTER TABLE `buku_besar`
 -- AUTO_INCREMENT for table `jurnal_umum`
 --
 ALTER TABLE `jurnal_umum`
-  MODIFY `id_jurnal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+  MODIFY `id_jurnal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 --
 -- AUTO_INCREMENT for table `log_login`
 --
 ALTER TABLE `log_login`
-  MODIFY `id_login` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id_login` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `pinjaman`
 --
 ALTER TABLE `pinjaman`
-  MODIFY `id_pinjaman` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_pinjaman` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `role`
 --
@@ -274,25 +354,37 @@ ALTER TABLE `role`
 -- AUTO_INCREMENT for table `simpanan`
 --
 ALTER TABLE `simpanan`
-  MODIFY `id_simpanan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id_simpanan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 --
--- Constraints for dumped tables
+-- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
 
 --
--- Constraints for table `angsuran`
+-- Ketidakleluasaan untuk tabel `angsuran`
 --
 ALTER TABLE `angsuran`
   ADD CONSTRAINT `angsuran_id_pinjaman` FOREIGN KEY (`id_pinjaman`) REFERENCES `pinjaman` (`id_pinjaman`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `pinjaman`
+-- Ketidakleluasaan untuk tabel `buku_besar`
+--
+ALTER TABLE `buku_besar`
+  ADD CONSTRAINT `buku_besar_ibfk_1` FOREIGN KEY (`id_aktivitas`) REFERENCES `aktivitas` (`id_aktivitas`);
+
+--
+-- Ketidakleluasaan untuk tabel `jurnal_umum`
+--
+ALTER TABLE `jurnal_umum`
+  ADD CONSTRAINT `jurnal_umum_ibfk_1` FOREIGN KEY (`id_aktivitas`) REFERENCES `aktivitas` (`id_aktivitas`);
+
+--
+-- Ketidakleluasaan untuk tabel `pinjaman`
 --
 ALTER TABLE `pinjaman`
   ADD CONSTRAINT `pinjaman_id_anggota` FOREIGN KEY (`id_anggota`) REFERENCES `anggota` (`id_anggota`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `simpanan`
+-- Ketidakleluasaan untuk tabel `simpanan`
 --
 ALTER TABLE `simpanan`
   ADD CONSTRAINT `simpanan_id_anggota` FOREIGN KEY (`id_anggota`) REFERENCES `anggota` (`id_anggota`) ON DELETE CASCADE ON UPDATE CASCADE;

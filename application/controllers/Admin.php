@@ -96,6 +96,7 @@ class Admin extends MY_Controller{
 		$this->template($this->data);
 	}
 
+	// 1
 	public function data_simpanan()
 	{
 		$this->load->model('anggota_m');
@@ -120,64 +121,222 @@ class Admin extends MY_Controller{
 			}	
 			$this->simpanan_m->insert($this->data['simpanan']);
 
-			$this->data['getSimpanan'] = $this->simpanan_m->get_last_row();
-
-			$this->data['entri1'] = [
-				'id_relasi'		=> $this->data['getSimpanan']->id_simpanan,
-				'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
-				'ket'			=> 'Kas Simpanan Wajib',
-				'debit'			=> $this->data['simpanan']['simpanan_wajib'],
-				'kredit'		=> $this->data['simpanan']['simpanan_wajib'],
-			];
-
-			$this->data['entri2'] = [
-				'id_relasi'		=> $this->data['getSimpanan']->id_simpanan,
-				'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
-				'ket'			=> 'Kas Simpanan Sukarela',
-				'debit'			=> $this->data['simpanan']['simpanan_sukarela'],
-				'kredit'		=> $this->data['simpanan']['simpanan_sukarela'],
-			];
-
-			$this->jurnal_umum_m->insert($this->data['entri1']);
-			$this->jurnal_umum_m->insert($this->data['entri2']);
-
-			$cek = $this->buku_besar_m->get_last_row();
-
-			if(!isset($cek)){
-				$saldo_debit1 	= $this->POST('simpanan_wajib');
-				$saldo_debit2	= $this->POST('simpanan_sukarela');
+			$this->load->model('jurnal_umum_m');
+			$check_jurnal_umum = $this->jurnal_umum_m->get_row(['id_aktivitas' => 1, 'tgl' => $this->data['simpanan']['tgl_simpanan']]);
+			if (isset($check_jurnal_umum))
+			{
+				$this->jurnal_umum_m->update($check_jurnal_umum->id_jurnal, [
+					'debit' 	=> $check_jurnal_umum->debit + $this->data['simpanan']['simpanan_wajib'],
+					'kredit' 	=> $check_jurnal_umum->kredit + $this->data['simpanan']['simpanan_wajib']
+				]);
 			}
-			if(isset($cek)){
-				$last_saldo_debit 	= $this->buku_besar_m->get_last_row()->saldo_debit;
-				$saldo_debit1 		= $this->POST('simpanan_wajib') + $last_saldo_debit;
-				$saldo_debit2 		= $this->POST('simpanan_sukarela') + $saldo_debit1;
+			else
+			{
+				$this->data['entri'] = [
+					'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
+					'ket'			=> 'Simpanan Wajib',
+					'debit'			=> $this->data['simpanan']['simpanan_wajib'],
+					'kredit'		=> $this->data['simpanan']['simpanan_wajib'],
+					'id_aktivitas'	=> 1
+				];
+				$this->jurnal_umum_m->insert($this->data['entri']);
 			}
 
-			$this->data['entri3'] = [
-				'id_relasi'		=> $this->data['getSimpanan']->id_simpanan,
-				'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
-				'ket'			=> 'Simpanan Wajib',
-				'ref'			=> '103',
-				'debit'			=> $this->data['simpanan']['simpanan_wajib'],
-				'kredit'		=> 0,
-				'saldo_debit'	=> $saldo_debit1,
-				'saldo_kredit'	=> 0 
-			];
-			
-			$this->data['entri4'] = [
-				'id_relasi'		=> $this->data['getSimpanan']->id_simpanan,
-				'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
-				'ket'			=> 'Simpanan Sukarela',
-				'ref'			=> '104',
-				'debit'			=> $this->data['simpanan']['simpanan_sukarela'],
-				'kredit'		=> 0,
-				'saldo_debit'	=> $saldo_debit2,
-				'saldo_kredit'	=> 0
-			];
+			$check_jurnal_umum = $this->jurnal_umum_m->get_row(['id_aktivitas' => 4, 'tgl' => $this->data['simpanan']['tgl_simpanan']]);
+			if (isset($check_jurnal_umum))
+			{
+				$this->jurnal_umum_m->update($check_jurnal_umum->id_jurnal, [
+					'debit' 	=> $check_jurnal_umum->debit + $this->data['simpanan']['simpanan_sukarela'],
+					'kredit' 	=> $check_jurnal_umum->kredit + $this->data['simpanan']['simpanan_sukarela']
+				]);
+			}
+			else
+			{
+				$this->data['entri'] = [
+					'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
+					'ket'			=> 'Simpanan Sukarela',
+					'debit'			=> $this->data['simpanan']['simpanan_sukarela'],
+					'kredit'		=> $this->data['simpanan']['simpanan_sukarela'],
+					'id_aktivitas'	=> 4
+				];
+				$this->jurnal_umum_m->insert($this->data['entri']);
+			}
 
-			$this->buku_besar_m->insert($this->data['entri3']);
-			$this->buku_besar_m->insert($this->data['entri4']);
-			
+			$this->load->model('buku_besar_m');
+			$temp = $this->buku_besar_m->get_last_row(['tgl <' => $this->data['simpanan']['tgl_simpanan']]);
+			if (isset($temp))
+				$this->data['saldo_debit'] 	= $temp->saldo_debit;
+			if (!isset($this->data['saldo_debit']))
+				$this->data['saldo_debit'] = 0;
+			if (isset($temp))
+				$this->data['saldo_kredit']	= $temp->saldo_kredit;
+			if (!isset($this->data['saldo_kredit']))
+				$this->data['saldo_kredit'] = 0;
+			if (isset($this->data['saldo_kredit']) && $this->data['saldo_kredit'] > 0)
+			{
+				$this->data['saldo_kredit'] -= $this->data['simpanan']['simpanan_wajib'];
+				if ($this->data['saldo_kredit'] < 0)
+				{
+					$this->data['saldo_debit'] 	= $this->data['saldo_kredit'] * (-1);
+					$this->data['saldo_kredit'] = 0;
+				}
+			}
+			else if (isset($this->data['saldo_debit']) && $this->data['saldo_debit'] >= 0)
+			{
+				$this->data['saldo_debit'] += $this->data['simpanan']['simpanan_wajib'];
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $this->data['simpanan']['tgl_simpanan'], 'id_aktivitas' => 1]);
+			if (isset($check_buku_besar))
+			{
+				if ($check_buku_besar->saldo_kredit > 0)
+				{
+					$check_buku_besar->saldo_kredit -= $this->data['simpanan']['simpanan_wajib'];
+					if ($check_buku_besar->saldo_kredit < 0)
+					{
+						$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+						$check_buku_besar->saldo_kredit = 0;
+					}
+				}
+				else
+				{
+					$check_buku_besar->saldo_debit += $this->data['simpanan']['simpanan_wajib'];
+				}
+
+				$data = [
+					'debit'			=> $check_buku_besar->debit + $this->data['simpanan']['simpanan_wajib'],
+					'saldo_kredit'	=> $check_buku_besar->saldo_kredit,
+					'saldo_debit'	=> $check_buku_besar->saldo_debit
+				];
+
+				$this->buku_besar_m->update($check_buku_besar->id_buku_besar, $data);
+			}
+			else
+			{
+				$this->data['entri'] = [
+					'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
+					'ket'			=> 'Simpanan Wajib',
+					'ref'			=> '103',
+					'debit'			=> $this->data['simpanan']['simpanan_wajib'],
+					'kredit'		=> 0,
+					'saldo_debit'	=> $this->data['saldo_debit'],
+					'saldo_kredit'	=> $this->data['saldo_kredit'],
+					'id_aktivitas'	=> 1 
+				];
+
+				$this->buku_besar_m->insert($this->data['entri']);
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $this->data['simpanan']['tgl_simpanan']]);
+
+			foreach ($check_buku_besar as $row)
+			{
+				$saldo_debit = $row->saldo_debit;
+				$saldo_kredit = $row->saldo_kredit;
+				$data = [];
+
+				if ($saldo_kredit > 0)
+				{
+					$data['saldo_kredit'] = $saldo_kredit - $this->data['simpanan']['simpanan_wajib'];
+					if ($data['saldo_kredit'] < 0)
+					{
+						$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+						$data['saldo_kredit'] = 0;
+					}
+				}
+				else
+					$data['saldo_debit'] = $saldo_debit + $this->data['simpanan']['simpanan_wajib'];
+
+				$this->buku_besar_m->update($row->id_buku_besar, $data);
+			}
+
+			$temp = $this->buku_besar_m->get_last_row(['tgl <=' => $this->data['simpanan']['tgl_simpanan']]);
+			if (isset($temp))
+				$this->data['saldo_debit'] 	= $temp->saldo_debit;
+			if (!isset($this->data['saldo_debit']))
+				$this->data['saldo_debit'] = 0;
+			if (isset($temp))
+				$this->data['saldo_kredit']	= $temp->saldo_kredit;
+			if (!isset($this->data['saldo_kredit']))
+				$this->data['saldo_kredit'] = 0;
+			if (isset($this->data['saldo_kredit']) && $this->data['saldo_kredit'] > 0)
+			{
+				$this->data['saldo_kredit'] -= $this->data['simpanan']['simpanan_sukarela'];
+				if ($this->data['saldo_kredit'] < 0)
+				{
+					$this->data['saldo_debit'] 	= $this->data['saldo_kredit'] * (-1);
+					$this->data['saldo_kredit'] = 0;
+				}
+			}
+			else if (isset($this->data['saldo_debit']) && $this->data['saldo_debit'] > 0)
+			{
+				$this->data['saldo_debit'] += $this->data['simpanan']['simpanan_sukarela'];
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $this->data['simpanan']['tgl_simpanan'], 'id_aktivitas' => 4]);
+			if (isset($check_buku_besar))
+			{
+				if ($check_buku_besar->saldo_kredit > 0)
+				{
+					$check_buku_besar->saldo_kredit -= $this->data['simpanan']['simpanan_sukarela'];
+					if ($check_buku_besar->saldo_kredit < 0)
+					{
+						$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+						$check_buku_besar->saldo_kredit = 0;
+					}
+				}
+				else
+				{
+					$check_buku_besar->saldo_debit += $this->data['simpanan']['simpanan_sukarela'];
+				}
+
+				$data = [
+					'debit'			=> $check_buku_besar->debit + $this->data['simpanan']['simpanan_sukarela'],
+					'saldo_kredit'	=> $check_buku_besar->saldo_kredit,
+					'saldo_debit'	=> $check_buku_besar->saldo_debit
+				];
+
+				$this->buku_besar_m->update($check_buku_besar->id_buku_besar, $data);
+			}
+			else
+			{
+				$this->data['entri'] = [
+					'tgl'			=> $this->data['simpanan']['tgl_simpanan'],
+					'ket'			=> 'Simpanan Sukarela',
+					'ref'			=> '104',
+					'debit'			=> $this->data['simpanan']['simpanan_sukarela'],
+					'kredit'		=> 0,
+					'saldo_debit'	=> $this->data['saldo_debit'],
+					'saldo_kredit'	=> $this->data['saldo_kredit'],
+					'id_aktivitas'	=> 4
+				];
+
+				$this->buku_besar_m->insert($this->data['entri']);
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $this->data['simpanan']['tgl_simpanan']]);
+
+			foreach ($check_buku_besar as $row)
+			{
+				$saldo_debit = $row->saldo_debit;
+				$saldo_kredit = $row->saldo_kredit;
+				$data = [];
+
+				if ($saldo_kredit > 0)
+				{
+					$data['saldo_kredit'] = $saldo_kredit - $this->data['simpanan']['simpanan_sukarela'];
+					if ($data['saldo_kredit'] < 0)
+					{
+						$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+						$data['saldo_kredit'] = 0;
+					}
+				}
+				else
+					$data['saldo_debit'] = $saldo_debit + $this->data['simpanan']['simpanan_sukarela'];
+
+				$this->buku_besar_m->update($row->id_buku_besar, $data);
+			}
+
 			$this->flashmsg('Data simpanan berhasil disimpan');
 			redirect('admin/data_simpanan');
 			exit;
@@ -185,63 +344,498 @@ class Admin extends MY_Controller{
 
 		if ($this->POST('edit') && $this->POST('edit_id_simpanan'))
 		{
+			$simpanan_bfr = $this->simpanan_m->get_row(['id_simpanan' => $this->POST('edit_id_simpanan')]);
+			$simpanan_wajib_bfr = $simpanan_bfr->simpanan_wajib;
+			$simpanan_sukarela_bfr = $simpanan_bfr->simpanan_sukarela;
+			$tgl_simpanan_bfr = $simpanan_bfr->tgl_simpanan;
+			$buku_besar_bfr = $this->buku_besar_m->get(['tgl' => $tgl_simpanan_bfr]);
+
 			$this->data['simpanan'] = [
 				'id_anggota'		=> $this->POST('edit_id_anggota'),
 				'tgl_simpanan'		=> $this->POST('edit_tgl_simpanan'),
 				'simpanan_wajib'	=> $this->POST('edit_simpanan_wajib'),
 				'simpanan_sukarela'	=> $this->POST('edit_simpanan_sukarela')
 			];
-
-			// update jurnal umum
-			$this->data['entri1'] = [
-				'tgl'			=> $this->POST('edit_tgl_simpanan'),
-				'debit'			=> $this->POST('edit_simpanan_wajib'),
-				'kredit'		=> $this->POST('edit_simpanan_wajib')
-			];
-
-			$this->data['entri2'] = [
-				'tgl'			=> $this->POST('edit_tgl_simpanan'),
-				'debit'			=> $this->POST('edit_simpanan_sukarela'),
-				'kredit'		=> $this->POST('edit_simpanan_sukarela')
-			];
-
-			$cek = $this->buku_besar_m->get_previous_row('id_relasi', $this->POST('edit_id_simpanan'), 'Simpanan Wajib');
-
-			if(!isset($cek)){
-				$saldo_debit1 	= $this->POST('edit_simpanan_wajib');
-				$saldo_debit2	= $this->POST('edit_simpanan_sukarela');
-			}
-			if(isset($cek)){
-				$prev_saldo_debit 	= $cek->saldo_debit;
-				$saldo_debit1 		= $this->POST('edit_simpanan_wajib') + $prev_saldo_debit;
-				$saldo_debit2 		= $this->POST('edit_simpanan_sukarela') + $saldo_debit1;
-			}
-
-			// update buku besar
-			$this->data['entri3'] = [
-				'tgl'			=> $this->POST('edit_tgl_simpanan'),
-				'ref'			=> '103',
-				'debit'			=> $this->POST('edit_simpanan_wajib'),
-				'kredit'		=> 0,
-				'saldo_debit'	=> $saldo_debit1,
-				'saldo_kredit'	=> 0 
-			];
-			
-			$this->data['entri4'] = [
-				'tgl'			=> $this->POST('edit_tgl_simpanan'),
-				'ref'			=> '104',
-				'debit'			=> $this->POST('edit_simpanan_sukarela'),
-				'kredit'		=> 0,
-				'saldo_debit'	=> $saldo_debit2,
-				'saldo_kredit'	=> 0
-			];
-
 			$this->simpanan_m->update($this->POST('edit_id_simpanan'), $this->data['simpanan']);
-			$this->jurnal_umum_m->update_where(['id_relasi' => $this->POST('edit_id_simpanan'), 'ket' => 'Kas Simpanan Wajib'], $this->data['entri1']);
-			$this->jurnal_umum_m->update_where(['id_relasi' => $this->POST('edit_id_simpanan'), 'ket' => 'Kas Simpanan Sukarela'], $this->data['entri2']);
-			$this->buku_besar_m->update_where(['id_relasi' => $this->POST('edit_id_simpanan'), 'ket' => 'Simpanan Wajib'], $this->data['entri3']);
-			$this->buku_besar_m->update_where(['id_relasi' => $this->POST('edit_id_simpanan'), 'ket' => 'Simpanan Sukarela'], $this->data['entri4']);
 
+			$simpanan_aft = $this->simpanan_m->get_row(['id_simpanan' => $this->POST('edit_id_simpanan')]);
+			$simpanan_wajib_aft = $simpanan_aft->simpanan_wajib;
+			$simpanan_sukarela_aft = $simpanan_aft->simpanan_sukarela;
+			$tgl_simpanan_aft = $simpanan_aft->tgl_simpanan;
+
+			$range_simpanan_wajib = $simpanan_wajib_bfr - $simpanan_wajib_aft;
+			$range_simpanan_sukarela = $simpanan_sukarela_bfr - $simpanan_sukarela_aft;
+			$range_simpanan = $range_simpanan_wajib + $range_simpanan_sukarela;
+
+			// yg lama di-update dulu, jika habis maka hapus
+			$jurnal_umum_bfr = $this->jurnal_umum_m->get(['tgl' => $tgl_simpanan_bfr]);
+			foreach ($jurnal_umum_bfr as $row)
+			{
+				if ($row->id_aktivitas == 1)
+				{
+					if ($range_simpanan_wajib > 0) // berkurang
+					{
+						$row->debit += $this->POST('edit_simpanan_wajib');
+						$row->kredit += $this->POST('edit_simpanan_wajib');
+					}
+					else
+					{
+						$row->debit -= $this->POST('edit_simpanan_wajib');
+						$row->kredit -= $this->POST('edit_simpanan_wajib');	
+					}
+
+					if ($row->debit <= 0 || $row->kredit <= 0)
+						$this->jurnal_umum_m->delete($row->id_jurnal);
+					else
+					{
+						$this->jurnal_umum_m->update($row->id_jurnal, [
+							'debit'	=> $row->debit,
+							'kredit'=> $row->kredit
+						]);
+					}
+				}
+				else
+				{
+					if ($range_simpanan_wajib > 0) // berkurang
+					{
+						$row->debit += $this->POST('edit_simpanan_sukarela');
+						$row->kredit += $this->POST('edit_simpanan_sukarela');
+					}
+					else
+					{
+						$row->debit -= $this->POST('edit_simpanan_sukarela');
+						$row->kredit -= $this->POST('edit_simpanan_sukarela');	
+					}
+
+					if ($row->debit <= 0 || $row->kredit <= 0)
+						$this->jurnal_umum_m->delete($row->id_jurnal);
+					else
+					{
+						$this->jurnal_umum_m->update($row->id_jurnal, [
+							'debit'	=> $row->debit,
+							'kredit'=> $row->kredit
+						]);
+					}
+				}
+			}
+
+			$check_jurnal_umum = $this->jurnal_umum_m->get(['tgl' => $this->POST('edit_tgl_simpanan')]);
+			if (count($check_jurnal_umum) > 0)
+			{
+				// update yg ada
+				foreach ($check_jurnal_umum as $row)
+				{
+					if ($row->id_aktivitas == 1)
+					{
+						$row->debit += $this->POST('edit_simpanan_wajib');
+						$row->kredit += $this->POST('edit_simpanan_wajib');
+						$this->jurnal_umum_m->update($row->id_jurnal, [
+							'debit'	=> $row->debit,
+							'kredit'=> $row->kredit
+						]);
+					}
+					else
+					{
+						$row->debit += $this->POST('edit_simpanan_sukarela');
+						$row->kredit += $this->POST('edit_simpanan_sukarela');
+						$this->jurnal_umum_m->update($row->id_jurnal, [
+							'debit'	=> $row->debit,
+							'kredit'=> $row->kredit
+						]);	
+					}
+				}
+			}
+			else
+			{
+				// create yg baru
+				$wajib = [
+					'ket'			=> 'Simpanan Wajib',
+					'tgl'			=> $this->POST('edit_tgl_simpanan'),
+					'debit'			=> $this->POST('edit_simpanan_wajib'),
+					'kredit'		=> $this->POST('edit_simpanan_wajib'),
+					'id_aktivitas'	=> 1
+				];
+				$this->jurnal_umum_m->insert($wajib);
+
+				$sukarela = [
+					'ket'			=> 'Simpanan Sukarela',
+					'tgl'			=> $this->POST('edit_tgl_simpanan'),
+					'debit'			=> $this->POST('edit_simpanan_sukarela'),
+					'kredit'		=> $this->POST('edit_simpanan_sukarela'),
+					'id_aktivitas'	=> 4
+				];
+				$this->jurnal_umum_m->insert($sukarela);
+			}
+
+			if ($tgl_simpanan_bfr != $tgl_simpanan_aft)
+			{
+				$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tgl_simpanan_bfr, 'id_aktivitas' => 1]);
+			}
+
+			$interval = [];
+			if ($tgl_simpanan_bfr < $tgl_simpanan_aft)
+				$interval = ['tgl >' => $tgl_simpanan_bfr, 'tgl <' => $tgl_simpanan_aft];
+			else
+				$interval = ['tgl <' => $tgl_simpanan_bfr, 'tgl >' => $tgl_simpanan_aft];
+
+			$buku_besar = $this->buku_besar_m->get($interval);
+
+			// update data pada range tanggal bfr dan aft
+			foreach ($buku_besar as $row)
+			{
+				if ($range_simpanan > 0)
+				{
+					$data['saldo_debit'] = $row->saldo_debit;
+					$data['saldo_kredit'] = $row->saldo_kredit;
+					if ($data['saldo_debit'] > 0)
+					{
+						$data['saldo_debit'] -= $range_simpanan;
+						if ($data['saldo_debit'] < 0)
+						{
+							$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+							$data['saldo_debit'] = 0;
+						}
+					}
+					else
+					{
+						$data['saldo_kredit'] += $range_simpanan;
+						if ($data['saldo_kredit'] < 0)
+						{
+							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+							$data['saldo_kredit'] = 0;
+						}
+					}
+				}
+				else
+				{
+					$data['saldo_debit'] = $row->saldo_debit;
+					$data['saldo_kredit'] = $row->saldo_kredit;
+					if ($data['saldo_kredit'] > 0)
+					{
+						$data['saldo_kredit'] -= $range_simpanan;
+						if ($data['saldo_kredit'] < 0)
+						{
+							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+							$data['saldo_kredit'] = 0;
+						}
+					}
+					else
+					{
+						$data['saldo_debit'] += $range_simpanan;
+						if ($data['saldo_debit'] < 0)
+						{
+							$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+							$data['saldo_debit'] = 0;
+						}
+					}
+				}
+
+				$this->buku_besar_m->update($row->id_buku_besar, $data);
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tgl_simpanan_aft, 'id_aktivitas !=' => 2, 'id_aktivitas !=' => 3]);
+			if (isset($check_buku_besar))
+			{
+				foreach ($check_buku_besar as $row)
+				{
+					if ($row->aktivitas == 1)
+					{
+						if ($range_simpanan_wajib > 0)
+						{
+							if ($row->debit > 0)
+							{
+								$row->debit -= $range_simpanan_wajib;
+								if ($row->debit < 0)
+								{
+									$row->kredit = $row->debit * (-1);
+									$row->debit = 0;
+								}
+							}
+							else
+								$row->kredit += $range_simpanan_wajib;
+
+							if ($row->saldo_debit > 0)
+							{
+								$row->saldo_debit -= $range_simpanan_wajib;
+								if ($row->saldo_debit < 0)
+								{
+									$row->saldo_kredit = $row->saldo_debit * (-1);
+									$row->saldo_debit = 0;
+								}
+							}
+							else
+								$row->saldo_kredit += $range_simpanan_wajib;
+						}
+						else
+						{
+							if ($row->kredit > 0)
+							{
+								$row->kredit += $range_simpanan_wajib;
+								if ($row->kredit < 0)
+								{
+									$row->debit = $row->kredit * (-1);
+									$row->kredit = 0;
+								}
+							}
+							else
+								$row->debit -= $range_simpanan_wajib;
+						
+							if ($row->saldo_kredit > 0)
+							{
+								$row->saldo_kredit += $range_simpanan_wajib;
+								if ($row->saldo_kredit < 0)
+								{
+									$row->saldo_debit = $row->saldo_kredit * (-1);
+									$row->saldo_kredit = 0;
+								}
+							}
+							else
+								$row->saldo_debit -= $range_simpanan_wajib;
+						}
+					}
+					else
+					{
+						if ($range_simpanan_sukarela > 0)
+						{
+							if ($row->debit > 0)
+							{
+								$row->debit -= $range_simpanan_sukarela + $range_simpanan_wajib;
+								if ($row->debit < 0)
+								{
+									$row->kredit = $row->debit * (-1);
+									$row->debit = 0;
+								}
+							}
+							else
+								$row->kredit += $range_simpanan_sukarela + $range_simpanan_wajib;
+
+							if ($row->saldo_debit > 0)
+							{
+								$row->saldo_debit -= $range_simpanan_sukarela + $range_simpanan_wajib;
+								if ($row->saldo_debit < 0)
+								{
+									$row->saldo_kredit = $row->saldo_debit * (-1);
+									$row->saldo_debit = 0;
+								}
+							}
+							else
+								$row->saldo_kredit += $range_simpanan_sukarela + $range_simpanan_wajib;
+						}
+						else
+						{
+							if ($row->kredit > 0)
+							{
+								$row->kredit += $range_simpanan_sukarela + $range_simpanan_wajib;
+								if ($row->kredit < 0)
+								{
+									$row->debit = $row->kredit * (-1);
+									$row->kredit = 0;
+								}
+							}
+							else
+								$row->debit -= $range_simpanan_sukarela + $range_simpanan_wajib;
+
+							if ($row->saldo_kredit > 0)
+							{
+								$row->saldo_kredit += $range_simpanan_sukarela + $range_simpanan_wajib;
+								if ($row->saldo_kredit < 0)
+								{
+									$row->saldo_debit = $row->saldo_kredit * (-1);
+									$row->saldo_kredit = 0;
+								}
+							}
+							else
+								$row->saldo_debit -= $range_simpanan_sukarela + $range_simpanan_wajib;
+						}
+					}
+
+					$this->buku_besar_m->update($row->id_buku_besar, [
+						'debit'			=> $row->debit,
+						'kredit'		=> $row->kredit,
+						'saldo_debit'	=> $row->saldo_debit,
+						'saldo_kredit'	=> $row->saldo_kredit
+					]);
+				}
+			}
+			else
+			{
+
+				// ============================================================================
+
+				$temp = $this->buku_besar_m->get_last_row(['tgl <' => $tgl_simpanan_aft]);
+				if (isset($temp))
+					$this->data['saldo_debit'] 	= $temp->saldo_debit;
+				if (!isset($this->data['saldo_debit']))
+					$this->data['saldo_debit'] = 0;
+				if (isset($temp))
+					$this->data['saldo_kredit']	= $temp->saldo_kredit;
+				if (!isset($this->data['saldo_kredit']))
+					$this->data['saldo_kredit'] = 0;
+				if (isset($this->data['saldo_kredit']) && $this->data['saldo_kredit'] > 0)
+				{
+					$this->data['saldo_kredit'] -= $this->POST('edit_simpanan_wajib');
+					if ($this->data['saldo_kredit'] < 0)
+					{
+						$this->data['saldo_debit'] 	= $this->data['saldo_kredit'] * (-1);
+						$this->data['saldo_kredit'] = 0;
+					}
+				}
+				else if (isset($this->data['saldo_debit']) && $this->data['saldo_debit'] >= 0)
+				{
+					$this->data['saldo_debit'] += $this->POST('edit_simpanan_wajib');
+				}
+
+				$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $this->data['simpanan']['tgl_simpanan'], 'id_aktivitas' => 1]);
+				if (isset($check_buku_besar))
+				{
+					if ($check_buku_besar->saldo_kredit > 0)
+					{
+						$check_buku_besar->saldo_kredit -= $this->POST('edit_simpanan_wajib');
+						if ($check_buku_besar->saldo_kredit < 0)
+						{
+							$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+							$check_buku_besar->saldo_kredit = 0;
+						}
+					}
+					else
+					{
+						$check_buku_besar->saldo_debit += $this->POST('edit_simpanan_wajib');
+					}
+
+					$data = [
+						'debit'			=> $check_buku_besar->debit + $this->POST('edit_simpanan_wajib'),
+						'saldo_kredit'	=> $check_buku_besar->saldo_kredit,
+						'saldo_debit'	=> $check_buku_besar->saldo_debit
+					];
+
+					$this->buku_besar_m->update($check_buku_besar->id_buku_besar, $data);
+				}
+				else
+				{
+					$this->data['entri'] = [
+						'tgl'			=> $tgl_simpanan_aft,
+						'ket'			=> 'Simpanan Wajib',
+						'ref'			=> '103',
+						'debit'			=> $this->POST('edit_simpanan_wajib'),
+						'kredit'		=> 0,
+						'saldo_debit'	=> $this->data['saldo_debit'],
+						'saldo_kredit'	=> $this->data['saldo_kredit'],
+						'id_aktivitas'	=> 1 
+					];
+
+					$this->buku_besar_m->insert($this->data['entri']);
+				}
+
+				$check_buku_besar = $this->buku_besar_m->get(['tgl >=' => $tgl_simpanan_aft, 'id_aktivitas !=' => 1, 'id_aktivitas !=' => 4]);
+
+				foreach ($check_buku_besar as $row)
+				{
+					$saldo_debit = $row->saldo_debit;
+					$saldo_kredit = $row->saldo_kredit;
+					$data = [];
+
+					if ($saldo_kredit > 0)
+					{
+						$data['saldo_kredit'] = $saldo_kredit - $this->POST('edit_simpanan_wajib');
+						if ($data['saldo_kredit'] < 0)
+						{
+							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+							$data['saldo_kredit'] = 0;
+						}
+					}
+					else
+						$data['saldo_debit'] = $saldo_debit + $this->POST('edit_simpanan_wajib');
+
+					$this->buku_besar_m->update($row->id_buku_besar, $data);
+				}
+
+				$temp = $this->buku_besar_m->get_last_row(['tgl <=' => $tgl_simpanan_aft, 'id_aktivitas !=' => 2, 'id_aktivitas !=' => 3]);
+				if (isset($temp))
+					$this->data['saldo_debit'] 	= $temp->saldo_debit;
+				if (!isset($this->data['saldo_debit']))
+					$this->data['saldo_debit'] = 0;
+				if (isset($temp))
+					$this->data['saldo_kredit']	= $temp->saldo_kredit;
+				if (!isset($this->data['saldo_kredit']))
+					$this->data['saldo_kredit'] = 0;
+				if (isset($this->data['saldo_kredit']) && $this->data['saldo_kredit'] > 0)
+				{
+					$this->data['saldo_kredit'] -= $this->POST('edit_simpanan_sukarela');
+					if ($this->data['saldo_kredit'] < 0)
+					{
+						$this->data['saldo_debit'] 	= $this->data['saldo_kredit'] * (-1);
+						$this->data['saldo_kredit'] = 0;
+					}
+				}
+				else if (isset($this->data['saldo_debit']) && $this->data['saldo_debit'] > 0)
+				{
+					$this->data['saldo_debit'] += $this->POST('edit_simpanan_sukarela');
+				}
+
+				$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tgl_simpanan_aft, 'id_aktivitas' => 4]);
+				if (isset($check_buku_besar))
+				{
+					if ($check_buku_besar->saldo_kredit > 0)
+					{
+						$check_buku_besar->saldo_kredit -= $this->POST('edit_simpanan_sukarela');
+						if ($check_buku_besar->saldo_kredit < 0)
+						{
+							$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+							$check_buku_besar->saldo_kredit = 0;
+						}
+					}
+					else
+					{
+						$check_buku_besar->saldo_debit += $this->POST('edit_simpanan_sukarela');
+					}
+
+					$data = [
+						'debit'			=> $check_buku_besar->debit + $this->POST('edit_simpanan_sukarela'),
+						'saldo_kredit'	=> $check_buku_besar->saldo_kredit,
+						'saldo_debit'	=> $check_buku_besar->saldo_debit
+					];
+
+					$this->buku_besar_m->update($check_buku_besar->id_buku_besar, $data);
+				}
+				else
+				{
+					$this->data['entri'] = [
+						'tgl'			=> $tgl_simpanan_aft,
+						'ket'			=> 'Simpanan Sukarela',
+						'ref'			=> '104',
+						'debit'			=> $this->POST('edit_simpanan_sukarela'),
+						'kredit'		=> 0,
+						'saldo_debit'	=> $this->data['saldo_debit'],
+						'saldo_kredit'	=> $this->data['saldo_kredit'],
+						'id_aktivitas'	=> 4
+					];
+
+					$this->buku_besar_m->insert($this->data['entri']);
+				}
+
+				$check_buku_besar = $this->buku_besar_m->get(['tgl >=' => $tgl_simpanan_aft, 'id_aktivitas !=' => 1, 'id_aktivitas !=' => 4]);
+
+				foreach ($check_buku_besar as $row)
+				{
+					$saldo_debit = $row->saldo_debit;
+					$saldo_kredit = $row->saldo_kredit;
+					$data = [];
+
+					if ($saldo_kredit > 0)
+					{
+						$data['saldo_kredit'] = $saldo_kredit - $this->POST('edit_simpanan_sukarela');
+						if ($data['saldo_kredit'] < 0)
+						{
+							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+							$data['saldo_kredit'] = 0;
+						}
+					}
+					else
+						$data['saldo_debit'] = $saldo_debit + $this->POST('edit_simpanan_sukarela');
+
+					$this->buku_besar_m->update($row->id_buku_besar, $data);
+				}
+			}
 
 			$this->flashmsg('Data simpanan berhasil diperbarui');
 			redirect('admin/data_simpanan');
@@ -273,6 +867,7 @@ class Admin extends MY_Controller{
 		$this->template($this->data);
 	}
 
+	// 1
 	public function data_pinjaman()
 	{
 		$this->load->model('anggota_m');
@@ -430,6 +1025,7 @@ class Admin extends MY_Controller{
 		$this->template($this->data);
 	}
 
+	// 1
 	public function data_angsuran()
 	{
 		$this->load->model('angsuran_m');
