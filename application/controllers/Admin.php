@@ -345,10 +345,12 @@ class Admin extends MY_Controller{
 		if ($this->POST('edit') && $this->POST('edit_id_simpanan'))
 		{
 			$simpanan_bfr = $this->simpanan_m->get_row(['id_simpanan' => $this->POST('edit_id_simpanan')]);
-			$simpanan_wajib_bfr = $simpanan_bfr->simpanan_wajib;
-			$simpanan_sukarela_bfr = $simpanan_bfr->simpanan_sukarela;
-			$tgl_simpanan_bfr = $simpanan_bfr->tgl_simpanan;
-			$buku_besar_bfr = $this->buku_besar_m->get(['tgl' => $tgl_simpanan_bfr]);
+			$simpanan_wajib_bfr 	= $simpanan_bfr->simpanan_wajib;
+			$simpanan_sukarela_bfr 	= $simpanan_bfr->simpanan_sukarela;
+			$tgl_simpanan_bfr 		= $simpanan_bfr->tgl_simpanan;
+			$buku_besar_bfr 		= $this->buku_besar_m->get(['tgl' => $tgl_simpanan_bfr]);
+
+			$check_simpanan_bft = $this->simpanan_m->get(['tgl_simpanan' => $tgl_simpanan_bfr]);
 
 			$this->data['simpanan'] = [
 				'id_anggota'		=> $this->POST('edit_id_anggota'),
@@ -359,13 +361,38 @@ class Admin extends MY_Controller{
 			$this->simpanan_m->update($this->POST('edit_id_simpanan'), $this->data['simpanan']);
 
 			$simpanan_aft = $this->simpanan_m->get_row(['id_simpanan' => $this->POST('edit_id_simpanan')]);
-			$simpanan_wajib_aft = $simpanan_aft->simpanan_wajib;
-			$simpanan_sukarela_aft = $simpanan_aft->simpanan_sukarela;
-			$tgl_simpanan_aft = $simpanan_aft->tgl_simpanan;
+			$simpanan_wajib_aft 	= $simpanan_aft->simpanan_wajib;
+			$simpanan_sukarela_aft 	= $simpanan_aft->simpanan_sukarela;
+			$tgl_simpanan_aft 		= $simpanan_aft->tgl_simpanan;
 
-			$range_simpanan_wajib = $simpanan_wajib_bfr - $simpanan_wajib_aft;
-			$range_simpanan_sukarela = $simpanan_sukarela_bfr - $simpanan_sukarela_aft;
-			$range_simpanan = $range_simpanan_wajib + $range_simpanan_sukarela;
+			$range_simpanan_wajib 		= $simpanan_wajib_bfr - $simpanan_wajib_aft;
+			$range_simpanan_sukarela 	= $simpanan_sukarela_bfr - $simpanan_sukarela_aft;
+			$range_simpanan 			= $range_simpanan_wajib + $range_simpanan_sukarela;
+
+			$check_simpanan_aft = $this->simpanan_m->get(['tgl_simpanan' => $tgl_simpanan_bfr]);
+			if (count($check_simpanan_bft) != count($check_simpanan_aft))
+			{
+				$temp = '';
+				foreach ($check_simpanan_bft as $r)
+					$temp = $r->tgl_simpanan;
+				if ($temp > $this->POST('edit_tgl_simpanan'))
+					$range_simpanan = ($simpanan_wajib_bfr + $simpanan_sukarela_bfr) * (-1);
+				else
+					$range_simpanan = ($simpanan_wajib_bfr + $simpanan_sukarela_bfr);
+			}
+
+			if ($tgl_simpanan_bfr != $tgl_simpanan_aft)
+			{
+				if ($simpanan_wajib_bfr != $simpanan_wajib_aft)
+					$range_simpanan_wajib = $simpanan_wajib_bfr - $simpanan_wajib_aft;
+				else
+					$range_simpanan_wajib = $this->POST('edit_simpanan_wajib');
+
+				if ($simpanan_sukarela_bfr != $simpanan_sukarela_bfr)
+					$range_simpanan_sukarela = $simpanan_sukarela_bfr - $simpanan_sukarela_aft;
+				else
+					$range_simpanan_sukarela = $this->POST('edit_simpanan_sukarela');
+			}
 
 			// yg lama di-update dulu, jika habis maka hapus
 			$jurnal_umum_bfr = $this->jurnal_umum_m->get(['tgl' => $tgl_simpanan_bfr]);
@@ -373,16 +400,8 @@ class Admin extends MY_Controller{
 			{
 				if ($row->id_aktivitas == 1)
 				{
-					if ($range_simpanan_wajib > 0) // berkurang
-					{
-						$row->debit += $this->POST('edit_simpanan_wajib');
-						$row->kredit += $this->POST('edit_simpanan_wajib');
-					}
-					else
-					{
-						$row->debit -= $this->POST('edit_simpanan_wajib');
-						$row->kredit -= $this->POST('edit_simpanan_wajib');	
-					}
+					$row->debit -= ($tgl_simpanan_bfr == $tgl_simpanan_aft) ? $range_simpanan_wajib : $simpanan_wajib_bfr;
+					$row->kredit -= ($tgl_simpanan_bfr == $tgl_simpanan_aft) ? $range_simpanan_wajib : $simpanan_wajib_bfr;	
 
 					if ($row->debit <= 0 || $row->kredit <= 0)
 						$this->jurnal_umum_m->delete($row->id_jurnal);
@@ -396,17 +415,9 @@ class Admin extends MY_Controller{
 				}
 				else
 				{
-					if ($range_simpanan_wajib > 0) // berkurang
-					{
-						$row->debit += $this->POST('edit_simpanan_sukarela');
-						$row->kredit += $this->POST('edit_simpanan_sukarela');
-					}
-					else
-					{
-						$row->debit -= $this->POST('edit_simpanan_sukarela');
-						$row->kredit -= $this->POST('edit_simpanan_sukarela');	
-					}
-
+					$row->debit -= ($tgl_simpanan_bfr == $tgl_simpanan_aft) ? $range_simpanan_sukarela : $simpanan_sukarela_bfr;
+					$row->kredit -= ($tgl_simpanan_bfr == $tgl_simpanan_aft) ? $range_simpanan_sukarela : $simpanan_sukarela_bfr;	
+					
 					if ($row->debit <= 0 || $row->kredit <= 0)
 						$this->jurnal_umum_m->delete($row->id_jurnal);
 					else
@@ -419,57 +430,153 @@ class Admin extends MY_Controller{
 				}
 			}
 
-			$check_jurnal_umum = $this->jurnal_umum_m->get(['tgl' => $this->POST('edit_tgl_simpanan')]);
-			if (count($check_jurnal_umum) > 0)
+			if ($tgl_simpanan_bfr != $tgl_simpanan_aft)
 			{
-				// update yg ada
-				foreach ($check_jurnal_umum as $row)
+				$check_jurnal_umum = $this->jurnal_umum_m->get(['tgl' => $this->POST('edit_tgl_simpanan')]);
+				if (count($check_jurnal_umum) > 0)
+				{
+					// update yg ada
+					foreach ($check_jurnal_umum as $row)
+					{
+						if ($row->id_aktivitas == 1)
+						{
+							$row->debit += $this->POST('edit_simpanan_wajib');
+							$row->kredit += $this->POST('edit_simpanan_wajib');
+							$this->jurnal_umum_m->update($row->id_jurnal, [
+								'debit'	=> $row->debit,
+								'kredit'=> $row->kredit
+							]);
+						}
+						else
+						{
+							$row->debit += $this->POST('edit_simpanan_sukarela');
+							$row->kredit += $this->POST('edit_simpanan_sukarela');
+							$this->jurnal_umum_m->update($row->id_jurnal, [
+								'debit'	=> $row->debit,
+								'kredit'=> $row->kredit
+							]);	
+						}
+					}
+				}
+				else
+				{
+					// create yg baru
+					$wajib = [
+						'ket'			=> 'Simpanan Wajib',
+						'tgl'			=> $this->POST('edit_tgl_simpanan'),
+						'debit'			=> $this->POST('edit_simpanan_wajib'),
+						'kredit'		=> $this->POST('edit_simpanan_wajib'),
+						'id_aktivitas'	=> 1
+					];
+					$this->jurnal_umum_m->insert($wajib);
+
+					$sukarela = [
+						'ket'			=> 'Simpanan Sukarela',
+						'tgl'			=> $this->POST('edit_tgl_simpanan'),
+						'debit'			=> $this->POST('edit_simpanan_sukarela'),
+						'kredit'		=> $this->POST('edit_simpanan_sukarela'),
+						'id_aktivitas'	=> 4
+					];
+					$this->jurnal_umum_m->insert($sukarela);
+				}
+
+				// kurangin saldo buku besar yg ditinggal
+				$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tgl_simpanan_bfr, 'id_aktivitas !=' => 2, 'id_aktivitas !=' => 3]);
+				foreach ($check_buku_besar as $row)
 				{
 					if ($row->id_aktivitas == 1)
 					{
-						$row->debit += $this->POST('edit_simpanan_wajib');
-						$row->kredit += $this->POST('edit_simpanan_wajib');
-						$this->jurnal_umum_m->update($row->id_jurnal, [
-							'debit'	=> $row->debit,
-							'kredit'=> $row->kredit
-						]);
+						$row->debit -= $simpanan_wajib_bfr;
+						$row->saldo_debit -= $simpanan_wajib_bfr;
 					}
 					else
 					{
-						$row->debit += $this->POST('edit_simpanan_sukarela');
-						$row->kredit += $this->POST('edit_simpanan_sukarela');
-						$this->jurnal_umum_m->update($row->id_jurnal, [
-							'debit'	=> $row->debit,
-							'kredit'=> $row->kredit
-						]);	
+						$row->debit -= $simpanan_sukarela_bfr;
+						$row->saldo_debit -= $simpanan_sukarela_bfr;
+					}
+
+					if ($row->debit <= 0)
+						$this->buku_besar_m->delete($row->id_buku_besar);
+					else
+					{
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'debit'			=> $row->debit,
+							'saldo_debit'	=> $row->saldo_debit
+						]);
+					}
+
+					// BARU DITAMBAH!!!!!
+					if ($row->id_aktivitas == 1)
+					{
+						$check_buku_besar_x1 = $this->buku_besar_m->get(['tgl' => $tgl_simpanan_bfr, 'id_aktivitas !=' => 1]);
+						
+						foreach ($check_buku_besar_x1 as $row_x1)
+						{
+							if ($row_x1->saldo_debit > 0)
+							{
+								$row_x1->saldo_debit -= $simpanan_wajib_bfr;
+								if ($row_x1->saldo_debit < 0)
+								{
+									$row_x1->saldo_kredit = $row_x1->saldo_debit * (-1);
+									$row_x1->saldo_debit = 0;
+								}
+								else
+									$row_x1->saldo_debit += $simpanan_wajib_bfr;
+							}
+
+							$this->buku_besar_m->update($row_x1->id_buku_besar, [
+								'saldo_debit'	=> $row_x1->saldo_debit,
+								'saldo_kredit'	=> $row_x1->saldo_kredit
+							]);
+						}
+
+						$check_buku_besar_x1 = $this->buku_besar_m->get(['tgl >' => $tgl_simpanan_bfr]);
+						
+						foreach ($check_buku_besar_x1 as $row_x1)
+						{
+							if ($row_x1->saldo_debit > 0)
+							{
+								$row_x1->saldo_debit -= $simpanan_wajib_bfr;
+								if ($row_x1->saldo_debit < 0)
+								{
+									$row_x1->saldo_kredit = $row_x1->saldo_debit * (-1);
+									$row_x1->saldo_debit = 0;
+								}
+							}
+							else
+								$row_x1->saldo_kredit += $simpanan_wajib_bfr;
+
+							$this->buku_besar_m->update($row_x1->id_buku_besar, [
+								'saldo_debit'	=> $row_x1->saldo_debit,
+								'saldo_kredit'	=> $row_x1->saldo_kredit
+							]);
+						}
+					}
+					else
+					{
+						$check_buku_besar_x4 = $this->buku_besar_m->get(['tgl' => $tgl_simpanan_bfr, 'id_aktivitas !=' => 4, 'id_aktivitas !=' => 1]);
+						
+						foreach ($check_buku_besar_x4 as $row_x4)
+						{
+							if ($row_x4->saldo_debit > 0)
+							{
+								$row_x4->saldo_debit -= $simpanan_sukarela_bfr;
+								if ($row_x4->saldo_debit < 0)
+								{
+									$row_x4->saldo_kredit = $row_x4->saldo_debit * (-1);
+									$row_x4->saldo_debit = 0;
+								}
+							}
+							else
+								$row_x4->saldo_kredit += $simpanan_sukarela_bfr;
+
+							$this->buku_besar_m->update($row_x4->id_buku_besar, [
+								'saldo_debit'	=> $row_x4->saldo_debit,
+								'saldo_kredit'	=> $row_x4->saldo_kredit
+							]);
+						}
 					}
 				}
-			}
-			else
-			{
-				// create yg baru
-				$wajib = [
-					'ket'			=> 'Simpanan Wajib',
-					'tgl'			=> $this->POST('edit_tgl_simpanan'),
-					'debit'			=> $this->POST('edit_simpanan_wajib'),
-					'kredit'		=> $this->POST('edit_simpanan_wajib'),
-					'id_aktivitas'	=> 1
-				];
-				$this->jurnal_umum_m->insert($wajib);
-
-				$sukarela = [
-					'ket'			=> 'Simpanan Sukarela',
-					'tgl'			=> $this->POST('edit_tgl_simpanan'),
-					'debit'			=> $this->POST('edit_simpanan_sukarela'),
-					'kredit'		=> $this->POST('edit_simpanan_sukarela'),
-					'id_aktivitas'	=> 4
-				];
-				$this->jurnal_umum_m->insert($sukarela);
-			}
-
-			if ($tgl_simpanan_bfr != $tgl_simpanan_aft)
-			{
-				$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tgl_simpanan_bfr, 'id_aktivitas' => 1]);
 			}
 
 			$interval = [];
@@ -480,16 +587,26 @@ class Admin extends MY_Controller{
 
 			$buku_besar = $this->buku_besar_m->get($interval);
 
-			// update data pada range tanggal bfr dan aft
+			// update data pada range tanggal bfr dan aft (COMPLETED!!)
 			foreach ($buku_besar as $row)
 			{
+				$changer = 0;
+				if ($row->id_aktivitas == 1)
+					$changer = $this->POST('edit_simpanan_wajib');
+				else
+					$changer = $this->POST('edit_simpanan_sukarela');
+
+				if ($tgl_simpanan_bfr < $tgl_simpanan_aft)
+					$changer *= (-1);
+
 				if ($range_simpanan > 0)
 				{
 					$data['saldo_debit'] = $row->saldo_debit;
 					$data['saldo_kredit'] = $row->saldo_kredit;
+
 					if ($data['saldo_debit'] > 0)
 					{
-						$data['saldo_debit'] -= $range_simpanan;
+						$data['saldo_debit'] += $changer;
 						if ($data['saldo_debit'] < 0)
 						{
 							$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
@@ -498,7 +615,7 @@ class Admin extends MY_Controller{
 					}
 					else
 					{
-						$data['saldo_kredit'] += $range_simpanan;
+						$data['saldo_kredit'] -= $changer;
 						if ($data['saldo_kredit'] < 0)
 						{
 							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
@@ -512,7 +629,7 @@ class Admin extends MY_Controller{
 					$data['saldo_kredit'] = $row->saldo_kredit;
 					if ($data['saldo_kredit'] > 0)
 					{
-						$data['saldo_kredit'] -= $range_simpanan;
+						$data['saldo_kredit'] -= $changer;
 						if ($data['saldo_kredit'] < 0)
 						{
 							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
@@ -521,12 +638,7 @@ class Admin extends MY_Controller{
 					}
 					else
 					{
-						$data['saldo_debit'] += $range_simpanan;
-						if ($data['saldo_debit'] < 0)
-						{
-							$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
-							$data['saldo_debit'] = 0;
-						}
+						$data['saldo_debit'] += $changer;
 					}
 				}
 
@@ -534,135 +646,171 @@ class Admin extends MY_Controller{
 			}
 
 			$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tgl_simpanan_aft, 'id_aktivitas !=' => 2, 'id_aktivitas !=' => 3]);
-			if (isset($check_buku_besar))
+
+			if (count($check_buku_besar) > 0) // COMPLETED!!
 			{
 				foreach ($check_buku_besar as $row)
 				{
-					if ($row->aktivitas == 1)
+					$debit = 0;
+					$saldo_debit = 0;
+					if ($row->id_aktivitas == 1)
 					{
-						if ($range_simpanan_wajib > 0)
+						if ($tgl_simpanan_aft == $tgl_simpanan_bfr)
 						{
-							if ($row->debit > 0)
-							{
-								$row->debit -= $range_simpanan_wajib;
-								if ($row->debit < 0)
-								{
-									$row->kredit = $row->debit * (-1);
-									$row->debit = 0;
-								}
-							}
-							else
-								$row->kredit += $range_simpanan_wajib;
-
-							if ($row->saldo_debit > 0)
-							{
-								$row->saldo_debit -= $range_simpanan_wajib;
-								if ($row->saldo_debit < 0)
-								{
-									$row->saldo_kredit = $row->saldo_debit * (-1);
-									$row->saldo_debit = 0;
-								}
-							}
-							else
-								$row->saldo_kredit += $range_simpanan_wajib;
+							$debit = $row->debit - $range_simpanan_wajib;
+							$saldo_debit = $row->saldo_debit - $range_simpanan_wajib;
 						}
 						else
 						{
-							if ($row->kredit > 0)
-							{
-								$row->kredit += $range_simpanan_wajib;
-								if ($row->kredit < 0)
-								{
-									$row->debit = $row->kredit * (-1);
-									$row->kredit = 0;
-								}
-							}
-							else
-								$row->debit -= $range_simpanan_wajib;
-						
-							if ($row->saldo_kredit > 0)
-							{
-								$row->saldo_kredit += $range_simpanan_wajib;
-								if ($row->saldo_kredit < 0)
-								{
-									$row->saldo_debit = $row->saldo_kredit * (-1);
-									$row->saldo_kredit = 0;
-								}
-							}
-							else
-								$row->saldo_debit -= $range_simpanan_wajib;
+							$debit = $row->debit + $this->POST('edit_simpanan_wajib');
+							$saldo_debit = $row->saldo_debit + $this->POST('edit_simpanan_wajib');
 						}
+						
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'debit'			=> $debit,
+							'saldo_debit'	=> $saldo_debit
+						]);
 					}
 					else
 					{
-						if ($range_simpanan_sukarela > 0)
+						if ($tgl_simpanan_aft == $tgl_simpanan_bfr)
 						{
-							if ($row->debit > 0)
-							{
-								$row->debit -= $range_simpanan_sukarela + $range_simpanan_wajib;
-								if ($row->debit < 0)
-								{
-									$row->kredit = $row->debit * (-1);
-									$row->debit = 0;
-								}
-							}
-							else
-								$row->kredit += $range_simpanan_sukarela + $range_simpanan_wajib;
-
-							if ($row->saldo_debit > 0)
-							{
-								$row->saldo_debit -= $range_simpanan_sukarela + $range_simpanan_wajib;
-								if ($row->saldo_debit < 0)
-								{
-									$row->saldo_kredit = $row->saldo_debit * (-1);
-									$row->saldo_debit = 0;
-								}
-							}
-							else
-								$row->saldo_kredit += $range_simpanan_sukarela + $range_simpanan_wajib;
+							$debit = $row->debit - $range_simpanan_sukarela;
+							$saldo_debit = $row->saldo_debit - ($range_simpanan_sukarela + $range_simpanan_wajib);
 						}
 						else
 						{
-							if ($row->kredit > 0)
-							{
-								$row->kredit += $range_simpanan_sukarela + $range_simpanan_wajib;
-								if ($row->kredit < 0)
-								{
-									$row->debit = $row->kredit * (-1);
-									$row->kredit = 0;
-								}
-							}
-							else
-								$row->debit -= $range_simpanan_sukarela + $range_simpanan_wajib;
-
-							if ($row->saldo_kredit > 0)
-							{
-								$row->saldo_kredit += $range_simpanan_sukarela + $range_simpanan_wajib;
-								if ($row->saldo_kredit < 0)
-								{
-									$row->saldo_debit = $row->saldo_kredit * (-1);
-									$row->saldo_kredit = 0;
-								}
-							}
-							else
-								$row->saldo_debit -= $range_simpanan_sukarela + $range_simpanan_wajib;
+							$debit = $row->debit + $this->POST('edit_simpanan_sukarela');
+							$saldo_debit = $row->saldo_debit + ($this->POST('edit_simpanan_sukarela') + $this->POST('edit_simpanan_wajib'));	
 						}
+						
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'debit'			=> $debit,
+							'saldo_debit'	=> $saldo_debit
+						]);
 					}
 
-					$this->buku_besar_m->update($row->id_buku_besar, [
-						'debit'			=> $row->debit,
-						'kredit'		=> $row->kredit,
-						'saldo_debit'	=> $row->saldo_debit,
-						'saldo_kredit'	=> $row->saldo_kredit
-					]);
+					// !!!!!!!!!!!!!
+					if ($tgl_simpanan_bfr < $tgl_simpanan_aft)
+					{
+						if ($row->id_aktivitas == 1)
+						{
+							$temp_buku_besar = $this->buku_besar_m->get_row(['tgl' => $row->tgl, 'id_aktivitas' => 4]);
+
+							if ($temp_buku_besar->saldo_kredit > 0)
+							{
+								$temp_buku_besar->saldo_kredit -= ($row->id_aktivitas == 1) ? $range_simpanan_wajib : $range_simpanan_sukarela;
+								if ($temp_buku_besar->saldo_kredit < 0)
+								{
+									$temp_buku_besar->saldo_debit = $temp_buku_besar->saldo_kredit * (-1);
+									$temp_buku_besar->saldo_kredit = 0;
+								}
+							}
+							else
+							{
+								if ($tgl_simpanan_aft == $tgl_simpanan_bfr)
+									$temp_buku_besar->saldo_debit -= ($row->id_aktivitas == 1) ? $range_simpanan_wajib : $range_simpanan_sukarela;
+								else
+									$temp_buku_besar->saldo_debit += ($row->id_aktivitas == 1) ? $range_simpanan_wajib : $range_simpanan_sukarela;
+							}
+
+							$this->buku_besar_m->update($temp_buku_besar->id_buku_besar, [
+								'debit'			=> $temp_buku_besar->debit,
+								'kredit'		=> $temp_buku_besar->kredit,
+								'saldo_debit'	=> $temp_buku_besar->saldo_debit,
+								'saldo_kredit'	=> $temp_buku_besar->saldo_kredit
+							]);
+
+						}
+						$buku_besar_aft = $this->buku_besar_m->get(['tgl >' => $row->tgl]);
+					}
+					else
+					{
+						if ($row->id_aktivitas == 1)
+						{
+							$temp_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tgl_simpanan_aft, 'id_aktivitas' => 4]);
+
+							if ($temp_buku_besar->saldo_kredit > 0)
+							{
+								$temp_buku_besar->saldo_kredit -= ($row->id_aktivitas == 1) ? $range_simpanan_wajib : $range_simpanan_sukarela;
+								if ($temp_buku_besar->saldo_kredit < 0)
+								{
+									$temp_buku_besar->saldo_debit = $temp_buku_besar->saldo_kredit * (-1);
+									$temp_buku_besar->saldo_kredit = 0;
+								}
+							}
+							else
+							{
+								if ($tgl_simpanan_aft == $tgl_simpanan_bfr)
+									$temp_buku_besar->saldo_debit -= ($row->id_aktivitas == 1) ? $range_simpanan_wajib : $range_simpanan_sukarela;
+								else
+									$temp_buku_besar->saldo_debit += ($row->id_aktivitas == 1) ? $range_simpanan_wajib : $range_simpanan_sukarela;
+							}
+
+							$this->buku_besar_m->update($temp_buku_besar->id_buku_besar, [
+								'debit'			=> $temp_buku_besar->debit,
+								'kredit'		=> $temp_buku_besar->kredit,
+								'saldo_debit'	=> $temp_buku_besar->saldo_debit,
+								'saldo_kredit'	=> $temp_buku_besar->saldo_kredit
+							]);
+
+						}
+						$buku_besar_aft = $this->buku_besar_m->get(['tgl >' => $tgl_simpanan_aft]);
+					}
+					
+					$tmp_bk_besar = $this->buku_besar_m->get_last_row(['tgl' => ($tgl_simpanan_bfr < $tgl_simpanan_aft) ? $row->tgl : $tgl_simpanan_aft]);
+					foreach ($buku_besar_aft as $row_aft)
+					{
+						if ($row_aft->kredit > 0)
+						{
+							if ($tmp_bk_besar->saldo_kredit > 0)
+							{
+								$saldo_kredit = $tmp_bk_besar->saldo_kredit + $row_aft->kredit;
+								$saldo_debit = 0;
+							}
+							else
+							{
+								$saldo_debit = $tmp_bk_besar->saldo_debit - $row_aft->kredit;
+								$saldo_kredit = 0;
+								if ($saldo_debit < 0)
+								{
+									$saldo_kredit = $saldo_debit * (-1);
+									$saldo_debit = 0;
+								}
+							}
+						}
+						else
+						{
+							if ($tmp_bk_besar->saldo_kredit > 0)
+							{
+								$saldo_kredit = $tmp_bk_besar->saldo_kredit - $row_aft->debit;
+								$saldo_debit = 0;
+								if ($saldo_kredit < 0)
+								{
+									$saldo_debit = $saldo_kredit * (-1);
+									$saldo_kredit = 0;
+								}
+							}
+							else
+							{
+								$saldo_debit = $tmp_bk_besar->saldo_debit + $row_aft->debit;
+								$saldo_kredit = 0;
+							}
+						}
+
+						$this->buku_besar_m->update($row_aft->id_buku_besar, [
+							'saldo_debit'	=> $saldo_debit,
+							'saldo_kredit'	=> $saldo_kredit
+						]);
+
+						$tmp_bk_besar = $this->buku_besar_m->get_row(['id_buku_besar' => $row_aft->id_buku_besar]);
+					}
 				}
 			}
 			else
 			{
-
-				// ============================================================================
-
 				$temp = $this->buku_besar_m->get_last_row(['tgl <' => $tgl_simpanan_aft]);
+
 				if (isset($temp))
 					$this->data['saldo_debit'] 	= $temp->saldo_debit;
 				if (!isset($this->data['saldo_debit']))
@@ -673,7 +821,7 @@ class Admin extends MY_Controller{
 					$this->data['saldo_kredit'] = 0;
 				if (isset($this->data['saldo_kredit']) && $this->data['saldo_kredit'] > 0)
 				{
-					$this->data['saldo_kredit'] -= $this->POST('edit_simpanan_wajib');
+					$this->data['saldo_kredit'] -= $this->POST('edit_simpanan_wajib') * 2;
 					if ($this->data['saldo_kredit'] < 0)
 					{
 						$this->data['saldo_debit'] 	= $this->data['saldo_kredit'] * (-1);
@@ -726,8 +874,9 @@ class Admin extends MY_Controller{
 					$this->buku_besar_m->insert($this->data['entri']);
 				}
 
-				$check_buku_besar = $this->buku_besar_m->get(['tgl >=' => $tgl_simpanan_aft, 'id_aktivitas !=' => 1, 'id_aktivitas !=' => 4]);
-
+				// update buku besar setelahnya
+				$check_buku_besar = $this->buku_besar_m->get(['tgl >=' => $tgl_simpanan_aft, 'id_aktivitas' => 2, 'id_aktivitas' => 3]);
+				
 				foreach ($check_buku_besar as $row)
 				{
 					$saldo_debit = $row->saldo_debit;
@@ -749,7 +898,8 @@ class Admin extends MY_Controller{
 					$this->buku_besar_m->update($row->id_buku_besar, $data);
 				}
 
-				$temp = $this->buku_besar_m->get_last_row(['tgl <=' => $tgl_simpanan_aft, 'id_aktivitas !=' => 2, 'id_aktivitas !=' => 3]);
+				$temp = $this->buku_besar_m->get_last_row(['tgl <=' => $tgl_simpanan_aft, 'id_aktivitas' => 1]);
+
 				if (isset($temp))
 					$this->data['saldo_debit'] 	= $temp->saldo_debit;
 				if (!isset($this->data['saldo_debit']))
@@ -767,7 +917,7 @@ class Admin extends MY_Controller{
 						$this->data['saldo_kredit'] = 0;
 					}
 				}
-				else if (isset($this->data['saldo_debit']) && $this->data['saldo_debit'] > 0)
+				else if (isset($this->data['saldo_debit']) && $this->data['saldo_debit'] >= 0)
 				{
 					$this->data['saldo_debit'] += $this->POST('edit_simpanan_sukarela');
 				}
@@ -813,7 +963,32 @@ class Admin extends MY_Controller{
 					$this->buku_besar_m->insert($this->data['entri']);
 				}
 
-				$check_buku_besar = $this->buku_besar_m->get(['tgl >=' => $tgl_simpanan_aft, 'id_aktivitas !=' => 1, 'id_aktivitas !=' => 4]);
+				// =============================================================
+
+				$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tgl_simpanan_aft, 'id_aktivitas' => 2, 'id_aktivitas' => 3]);
+
+				foreach ($check_buku_besar as $row)
+				{
+					$saldo_debit = $row->saldo_debit;
+					$saldo_kredit = $row->saldo_kredit;
+					$data = [];
+
+					if ($saldo_kredit > 0)
+					{
+						$data['saldo_kredit'] = $saldo_kredit - $this->POST('edit_simpanan_sukarela');
+						if ($data['saldo_kredit'] < 0)
+						{
+							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+							$data['saldo_kredit'] = 0;
+						}
+					}
+					else
+						$data['saldo_debit'] = $saldo_debit + $this->POST('edit_simpanan_sukarela');
+
+					$this->buku_besar_m->update($row->id_buku_besar, $data);
+				}
+
+				$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $tgl_simpanan_aft]);
 
 				foreach ($check_buku_besar as $row)
 				{
@@ -856,7 +1031,144 @@ class Admin extends MY_Controller{
 
 		if ($this->POST('delete') && $this->POST('id_simpanan'))
 		{
+			$simpanan_bfr = $this->simpanan_m->get_row(['id_simpanan' => $this->POST('id_simpanan')]);
 			$this->simpanan_m->delete($this->POST('id_simpanan'));
+			$tanggal = $simpanan_bfr->tgl_simpanan;
+
+			$this->load->model('jurnal_umum_m');
+			$check_jurnal_umum = $this->jurnal_umum_m->get(['tgl' => $tanggal]);
+			foreach ($check_jurnal_umum as $row)
+			{
+				$row->debit -= ($row->id_aktivitas == 1) ? $simpanan_bfr->simpanan_wajib : $simpanan_bfr->simpanan_sukarela;
+				$row->kredit -= ($row->id_aktivitas == 1) ? $simpanan_bfr->simpanan_wajib : $simpanan_bfr->simpanan_sukarela;
+
+				if ($row->debit <= 0 or $row->kredit <= 0)
+					$this->jurnal_umum_m->delete_by(['id_jurnal' => $row->id_jurnal]);
+				else
+					$this->jurnal_umum_m->update($row->id_jurnal, [
+						'debit'		=> $row->debit,
+						'kredit'	=> $row->kredit
+					]);
+			}
+			
+			$debit = $simpanan_bfr->simpanan_wajib + $simpanan_bfr->simpanan_sukarela;
+			
+			$this->load->model('buku_besar_m');
+			$buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal, 'id_aktivitas' => 1]);
+			$buku_besar->debit -= $simpanan_bfr->simpanan_wajib;
+			if ($buku_besar->debit <= 0)
+				$this->buku_besar_m->delete($buku_besar->id_buku_besar);
+			else
+			{
+				if ($buku_besar->saldo_kredit > 0)
+					$buku_besar->saldo_kredit += $simpanan_bfr->simpanan_wajib;
+				else
+				{
+					$buku_besar->saldo_debit -= $simpanan_bfr->simpanan_wajib;
+					if ($buku_besar->saldo_debit < 0)
+					{
+						$buku_besar->saldo_kredit = $buku_besar->saldo_debit * (-1);
+						$buku_besar->saldo_debit = 0;
+					}
+				}
+
+				$this->buku_besar_m->update($buku_besar->id_buku_besar, [
+					'debit'			=> $buku_besar->debit,
+					'saldo_debit'	=> $buku_besar->saldo_debit,
+					'saldo_kredit'	=> $buku_besar->saldo_kredit
+				]);
+
+				$buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal, 'id_aktivitas' => 4]);
+				if ($buku_besar->saldo_kredit > 0)
+					$buku_besar->saldo_kredit += $simpanan_bfr->simpanan_wajib;
+				else
+				{
+					$buku_besar->saldo_debit -= $simpanan_bfr->simpanan_wajib;
+					if ($buku_besar->saldo_debit < 0)
+					{
+						$buku_besar->saldo_kredit = $buku_besar->saldo_debit * (-1);
+						$buku_besar->saldo_debit = 0;
+					}
+				}
+
+				$this->buku_besar_m->update($buku_besar->id_buku_besar, [
+					'saldo_debit'	=> $buku_besar->saldo_debit,
+					'saldo_kredit'	=> $buku_besar->saldo_kredit
+				]);
+			}
+
+			$buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal, 'id_aktivitas' => 4]);
+			$buku_besar->debit -= $simpanan_bfr->simpanan_wajib;
+			if ($buku_besar->debit <= 0)
+				$this->buku_besar_m->delete($buku_besar->id_buku_besar);
+			else
+			{
+				if ($buku_besar->saldo_kredit > 0)
+					$buku_besar->saldo_kredit += $simpanan_bfr->simpanan_wajib;
+				else
+				{
+					$buku_besar->saldo_debit -= $simpanan_bfr->simpanan_wajib;
+					if ($buku_besar->saldo_debit < 0)
+					{
+						$buku_besar->saldo_kredit = $buku_besar->saldo_debit * (-1);
+						$buku_besar->saldo_debit = 0;
+					}
+				}
+
+				$this->buku_besar_m->update($buku_besar->id_buku_besar, [
+					'debit'			=> $buku_besar->debit,
+					'saldo_debit'	=> $buku_besar->saldo_debit,
+					'saldo_kredit'	=> $buku_besar->saldo_kredit
+				]);
+			}
+
+			$buku_besar_s = $this->buku_besar_m->get(['tgl' => $tanggal, 'id_aktivitas !=' => 4, 'id_aktivitas !=' => 1]);
+			
+			foreach ($buku_besar_s as $buku_besar)
+			{
+				if ($buku_besar->saldo_debit > 0)
+				{
+					$buku_besar->saldo_debit -= $simpanan_bfr->simpanan_wajib + $simpanan_bfr->simpanan_sukarela;
+					if ($buku_besar->saldo_debit < 0)
+					{
+						$buku_besar->saldo_kredit = $buku_besar->saldo_debit * (-1);
+						$buku_besar->saldo_debit = 0;
+					}
+				}
+				else
+				{
+					$buku_besar->saldo_kredit += $simpanan_bfr->simpanan_wajib + $simpanan_bfr->simpanan_sukarela;
+				}
+
+				$this->buku_besar_m->update($buku_besar->id_buku_besar, [
+					'saldo_debit'	=> $buku_besar->saldo_debit,
+					'saldo_kredit'	=> $buku_besar->saldo_kredit
+				]);
+			}
+
+			$buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal]);
+			foreach ($buku_besar as $row)
+			{
+				if ($row->saldo_debit > 0)
+				{
+					$row->saldo_debit -= $simpanan_bfr->simpanan_wajib + $simpanan_bfr->simpanan_sukarela;
+					if ($row->saldo_debit < 0)
+					{
+						$row->saldo_kredit = $row->saldo_debit * (-1);
+						$row->saldo_debit = 0;
+					}
+				}
+				else
+				{
+					$row->saldo_kredit += $simpanan_bfr->simpanan_wajib + $simpanan_bfr->simpanan_sukarela;
+				}
+
+				$this->buku_besar_m->update($row->id_buku_besar, [
+					'saldo_debit'	=> $row->saldo_debit,
+					'saldo_kredit'	=> $row->saldo_kredit
+				]);
+			}
+
 			exit;
 		}
 
@@ -893,41 +1205,135 @@ class Admin extends MY_Controller{
 			
 			$this->pinjaman_m->insert($this->data['pinjaman']);
 
-			$this->data['getPinjaman'] = $this->pinjaman_m->get_last_row();
-			
-			$this->data['entri1'] = [
-				'id_relasi2'	=> $this->data['getPinjaman']->id_pinjaman,
-				'tgl'			=> $this->data['pinjaman']['tgl_pinjaman'],
-				'ket'			=> 'Pinjaman',
-				'debit'			=> 0,
-				'kredit'		=> $this->data['pinjaman']['jlh_pinjaman'],
-			];
-
-			$this->jurnal_umum_m->insert($this->data['entri1']);
-
-			$cek = $this->buku_besar_m->get_last_row();
-
-			if(!isset($cek)){
-				$saldo_kredit 	= $this->POST('jlh_pinjaman');
-				$saldo_debit 	= 0;
+			$this->load->model('jurnal_umum_m');
+			$check_jurnal_umum = $this->jurnal_umum_m->get_row(['id_aktivitas' => 2, 'tgl' => $this->data['pinjaman']['tgl_pinjaman']]);
+			if (isset($check_jurnal_umum))
+			{
+				$this->jurnal_umum_m->update($check_jurnal_umum->id_jurnal, [
+					'kredit' 	=> $check_jurnal_umum->kredit + $this->data['pinjaman']['jlh_pinjaman']
+				]);
 			}
-			if(isset($cek)){
-				$last_saldo_debit 	= $this->buku_besar_m->get_last_row()->saldo_debit;
-				$saldo_debit		= $last_saldo_debit - $this->POST('jlh_pinjaman');
+			else
+			{
+				$this->data['entri'] = [
+					'tgl'			=> $this->data['pinjaman']['tgl_pinjaman'],
+					'ket'			=> 'Pinjaman',
+					'debit'			=> 0,
+					'kredit'		=> $this->data['pinjaman']['jlh_pinjaman'],
+					'id_aktivitas'	=> 2
+				];
+				$this->jurnal_umum_m->insert($this->data['entri']);
 			}
 
-			$this->data['entri2'] = [
-				'id_relasi2'	=> $this->data['getPinjaman']->id_pinjaman,
-				'tgl'			=> $this->data['pinjaman']['tgl_pinjaman'],
-				'ket'			=> 'Pinjaman',
-				'ref'			=> '105',
-				'debit'			=> 0,
-				'kredit'		=> $this->data['pinjaman']['jlh_pinjaman'],
-				'saldo_debit'	=> $saldo_debit,
-				'saldo_kredit'	=> 0 
-			];
-			
-			$this->buku_besar_m->insert($this->data['entri2']);
+			$this->load->model('buku_besar_m');
+			$temp = $this->buku_besar_m->get_last_row(['tgl <' => $this->data['pinjaman']['tgl_pinjaman']], 'tgl');
+			if (isset($temp))
+				$this->data['saldo_debit'] 	= $temp->saldo_debit;
+			if (!isset($this->data['saldo_debit']))
+				$this->data['saldo_debit'] = 0;
+			if (isset($temp))
+				$this->data['saldo_kredit']	= $temp->saldo_kredit;
+			if (!isset($this->data['saldo_kredit']))
+				$this->data['saldo_kredit'] = 0;
+			if (isset($this->data['saldo_debit']) && $this->data['saldo_debit'] > 0)
+			{
+				$this->data['saldo_debit'] -= $this->data['pinjaman']['jlh_pinjaman'];
+				if ($this->data['saldo_debit'] < 0)
+				{
+					$this->data['saldo_kredit'] = $this->data['saldo_debit'] * (-1);
+					$this->data['saldo_debit'] 	= 0;
+				}
+			}
+			else if (isset($this->data['saldo_kredit']) && $this->data['saldo_kredit'] >= 0)
+			{
+				$this->data['saldo_kredit'] += $this->data['pinjaman']['jlh_pinjaman'];
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $this->data['pinjaman']['tgl_pinjaman'], 'id_aktivitas' => 2]);
+			if (isset($check_buku_besar))
+			{
+				if ($check_buku_besar->saldo_debit > 0)
+				{
+					$check_buku_besar->saldo_debit -= $this->data['pinjaman']['jlh_pinjaman'];
+					if ($check_buku_besar->saldo_debit < 0)
+					{
+						$check_buku_besar->saldo_kredit = $check_buku_besar->saldo_debit * (-1);
+						$check_buku_besar->saldo_debit = 0;
+					}
+				}
+				else
+				{
+					$check_buku_besar->saldo_kredit += $this->data['pinjaman']['jlh_pinjaman'];
+				}
+
+				$data = [
+					'kredit'		=> $check_buku_besar->kredit + $this->data['pinjaman']['jlh_pinjaman'],
+					'saldo_kredit'	=> $check_buku_besar->saldo_kredit,
+					'saldo_debit'	=> $check_buku_besar->saldo_debit
+				];
+
+				$this->buku_besar_m->update($check_buku_besar->id_buku_besar, $data);
+			}
+			else
+			{
+				$this->data['entri'] = [
+					'tgl'			=> $this->data['pinjaman']['tgl_pinjaman'],
+					'ket'			=> 'Pinjaman',
+					'ref'			=> '105',
+					'debit'			=> 0,
+					'kredit'		=> $this->data['pinjaman']['jlh_pinjaman'],
+					'saldo_debit'	=> $this->data['saldo_debit'],
+					'saldo_kredit'	=> $this->data['saldo_kredit'],
+					'id_aktivitas'	=> 2
+				];
+
+				$this->buku_besar_m->insert($this->data['entri']);
+			}
+
+			// update data pada tgl yg sama namun id_aktivitas yg berbeda
+			$check_buku_besar = $this->buku_besar_m->get(['tgl' => $this->data['pinjaman']['tgl_pinjaman'], 'id_aktivitas !=' => 2]);
+			foreach ($check_buku_besar as $row)
+			{
+				$saldo_debit = $row->saldo_debit;
+				$saldo_kredit = $row->saldo_kredit;
+				$data = [];
+
+				if ($saldo_debit > 0)
+				{
+					$data['saldo_debit'] = $saldo_debit - $this->data['pinjaman']['jlh_pinjaman'];
+					if ($data['saldo_debit'] < 0)
+					{
+						$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+						$data['saldo_debit'] = 0;
+					}
+				}
+				else
+					$data['saldo_kredit'] = $saldo_kredit + $this->data['pinjaman']['jlh_pinjaman'];
+
+				$this->buku_besar_m->update($row->id_buku_besar, $data);
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $this->data['pinjaman']['tgl_pinjaman']]);
+			foreach ($check_buku_besar as $row)
+			{
+				$saldo_debit = $row->saldo_debit;
+				$saldo_kredit = $row->saldo_kredit;
+				$data = [];
+
+				if ($saldo_debit > 0)
+				{
+					$data['saldo_debit'] = $saldo_debit - $this->data['pinjaman']['jlh_pinjaman'];
+					if ($data['saldo_debit'] < 0)
+					{
+						$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+						$data['saldo_debit'] = 0;
+					}
+				}
+				else
+					$data['saldo_kredit'] = $saldo_kredit + $this->data['pinjaman']['jlh_pinjaman'];
+
+				$this->buku_besar_m->update($row->id_buku_besar, $data);
+			}
 
 			$this->flashmsg('Data pinjaman berhasil disimpan');
 			redirect('admin/data_pinjaman');
@@ -941,6 +1347,13 @@ class Admin extends MY_Controller{
 			$edit_total 	= $edit_bunga + $this->POST('edit_jlh_pinjaman');
 			$edit_angsuran 	= $edit_total/$this->POST('edit_lama_pinjaman');
 
+			$pinjaman_bfr = $this->pinjaman_m->get_row(['id_pinjaman' => $this->POST('edit_id_pinjaman')]);
+
+			$jlh_pinjaman_bfr 	= $pinjaman_bfr->jlh_pinjaman;
+			$tanggal_bfr 		= $pinjaman_bfr->tgl_pinjaman;
+			$jlh_pinjaman_aft 	= $this->POST('edit_jlh_pinjaman');
+			$tanggal_aft 		= $this->POST('edit_tgl_pinjaman');
+
 			$this->data['pinjaman'] = [
 				'id_anggota'		=> $this->POST('edit_id_anggota'),
 				'tgl_pinjaman'		=> $this->POST('edit_tgl_pinjaman'),
@@ -951,49 +1364,53 @@ class Admin extends MY_Controller{
 				'angsuran'			=> $edit_angsuran
 			];
 
-			// update jurnal umum pinjaman
-			$this->data['entri1'] = [
-				'tgl'			=> $this->POST('edit_tgl_pinjaman'),
-				'ket'			=> 'Pinjaman',
-				'kredit'		=> $this->POST('edit_jlh_pinjaman')
-			];
-
-			// update buku besar pinjaman
-			$cekNull = $this->buku_besar_m->get_last_row()->id_relasi2;
-			echo $cekNull; exit;
-			if($cekNull == NULL){
-				$cek = $this->buku_besar_m->get_last_row();
-				echo 'hay';
-				exit;
-			}
-			else{
-				$cek = $this->buku_besar_m->get_previous_row('id_relasi2', $this->POST('edit_id_pinjaman'), 'Pinjaman');
-				echo 'hay2';
-				exit;
-			}
-			
-			if(!isset($cek)){
-				$saldo_kredit 	= $this->POST('edit_jlh_pinjaman');
-				$saldo_debit 	= 0;
-			}
-			if(isset($cek)){
-				$prev_saldo_debit 	= $cek->saldo_debit;
-				$saldo_debit		= $prev_saldo_debit - $this->POST('edit_jlh_pinjaman');
-			}
-
-			$this->data['entri2'] = [
-				'tgl'			=> $this->POST('edit_tgl_pinjaman'),
-				'ket'			=> 'Pinjaman',
-				'ref'			=> '105',
-				'debit'			=> 0,
-				'kredit'		=> $this->POST('edit_jlh_pinjaman'),
-				'saldo_debit'	=> $saldo_debit,
-				'saldo_kredit'	=> 0 
-			];
-
 			$this->pinjaman_m->update($this->POST('edit_id_pinjaman'), $this->data['pinjaman']);
-			$this->jurnal_umum_m->update_where(['id_relasi2' => $this->POST('edit_id_pinjaman')], $this->data['entri1']);
-			$this->buku_besar_m->update_where(['id_relasi2' => $this->POST('edit_id_pinjaman')], $this->data['entri2']);
+
+			$this->load->model('jurnal_umum_m');
+			$this->load->model('buku_besar_m');
+
+			// // update jurnal umum pinjaman
+			// $this->data['entri1'] = [
+			// 	'tgl'			=> $this->POST('edit_tgl_pinjaman'),
+			// 	'ket'			=> 'Pinjaman',
+			// 	'kredit'		=> $this->POST('edit_jlh_pinjaman')
+			// ];
+
+			// // update buku besar pinjaman
+			// $cekNull = $this->buku_besar_m->get_last_row()->id_relasi2;
+			// echo $cekNull; exit;
+			// if($cekNull == NULL){
+			// 	$cek = $this->buku_besar_m->get_last_row();
+			// 	echo 'hay';
+			// 	exit;
+			// }
+			// else{
+			// 	$cek = $this->buku_besar_m->get_previous_row('id_relasi2', $this->POST('edit_id_pinjaman'), 'Pinjaman');
+			// 	echo 'hay2';
+			// 	exit;
+			// }
+			
+			// if(!isset($cek)){
+			// 	$saldo_kredit 	= $this->POST('edit_jlh_pinjaman');
+			// 	$saldo_debit 	= 0;
+			// }
+			// if(isset($cek)){
+			// 	$prev_saldo_debit 	= $cek->saldo_debit;
+			// 	$saldo_debit		= $prev_saldo_debit - $this->POST('edit_jlh_pinjaman');
+			// }
+
+			// $this->data['entri2'] = [
+			// 	'tgl'			=> $this->POST('edit_tgl_pinjaman'),
+			// 	'ket'			=> 'Pinjaman',
+			// 	'ref'			=> '105',
+			// 	'debit'			=> 0,
+			// 	'kredit'		=> $this->POST('edit_jlh_pinjaman'),
+			// 	'saldo_debit'	=> $saldo_debit,
+			// 	'saldo_kredit'	=> 0 
+			// ];
+
+			// $this->jurnal_umum_m->update_where(['id_relasi2' => $this->POST('edit_id_pinjaman')], $this->data['entri1']);
+			// $this->buku_besar_m->update_where(['id_relasi2' => $this->POST('edit_id_pinjaman')], $this->data['entri2']);
 
 			$this->flashmsg('Data pinjaman berhasil diperbarui');
 			redirect('admin/data_pinjaman');
@@ -1014,7 +1431,98 @@ class Admin extends MY_Controller{
 
 		if ($this->POST('delete') && $this->POST('id_pinjaman'))
 		{
+			$pinjaman_bfr = $this->pinjaman_m->get_row(['id_pinjaman' => $this->POST('id_pinjaman')]);
 			$this->pinjaman_m->delete($this->POST('id_pinjaman'));
+			$tanggal = $pinjaman_bfr->tgl_pinjaman;
+
+			$this->load->model('jurnal_umum_m');
+			$check_jurnal_umum = $this->jurnal_umum_m->get(['tgl' => $tanggal]);
+			foreach ($check_jurnal_umum as $row)
+			{
+				$row->kredit -= $pinjaman_bfr->jlh_pinjaman;
+
+				if ($row->kredit <= 0)
+					$this->jurnal_umum_m->delete_by(['id_jurnal' => $row->id_jurnal]);
+				else
+					$this->jurnal_umum_m->update($row->id_jurnal, [
+						'kredit'	=> $row->kredit
+					]);
+			}
+			
+			$kredit = $pinjaman_bfr->jlh_pinjaman;
+			
+			$this->load->model('buku_besar_m');
+			$buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal, 'id_aktivitas' => 2]);
+			$buku_besar->kredit -= $pinjaman_bfr->jlh_pinjaman;
+			if ($buku_besar->kredit <= 0)
+				$this->buku_besar_m->delete($buku_besar->id_buku_besar);
+			else
+			{
+				if ($buku_besar->saldo_debit > 0)
+					$buku_besar->saldo_debit += $pinjaman_bfr->jlh_pinjaman;
+				else
+				{
+					$buku_besar->saldo_kredit -= $pinjaman_bfr->jlh_pinjaman;
+					if ($buku_besar->saldo_kredit < 0)
+					{
+						$buku_besar->saldo_debit = $buku_besar->saldo_kredit * (-1);
+						$buku_besar->saldo_kredit = 0;
+					}
+				}
+
+				$this->buku_besar_m->update($buku_besar->id_buku_besar, [
+					'kredit'		=> $buku_besar->kredit,
+					'saldo_debit'	=> $buku_besar->saldo_debit,
+					'saldo_kredit'	=> $buku_besar->saldo_kredit
+				]);
+			}
+
+			$buku_besar_s = $this->buku_besar_m->get(['tgl' => $tanggal, 'id_aktivitas !=' => 2]);
+			
+			foreach ($buku_besar_s as $buku_besar)
+			{
+				if ($buku_besar->saldo_kredit > 0)
+				{
+					$buku_besar->saldo_kredit -= $pinjaman_bfr->jlh_pinjaman;
+					if ($buku_besar->saldo_kredit < 0)
+					{
+						$buku_besar->saldo_debit = $buku_besar->saldo_kredit * (-1);
+						$buku_besar->saldo_kredit = 0;
+					}
+				}
+				else
+				{
+					$buku_besar->saldo_debit += $pinjaman_bfr->jlh_pinjaman;
+				}
+
+				$this->buku_besar_m->update($buku_besar->id_buku_besar, [
+					'saldo_debit'	=> $buku_besar->saldo_debit,
+					'saldo_kredit'	=> $buku_besar->saldo_kredit
+				]);
+			}
+
+			$buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal]);
+			foreach ($buku_besar as $row)
+			{
+				if ($row->saldo_kredit > 0)
+				{
+					$row->saldo_kredit -= $pinjaman_bfr->jlh_pinjaman;
+					if ($row->saldo_kredit < 0)
+					{
+						$row->saldo_debit = $row->saldo_kredit * (-1);
+						$row->saldo_kredit = 0;
+					}
+				}
+				else
+				{
+					$row->saldo_debit += $pinjaman_bfr->jlh_pinjaman;
+				}
+
+				$this->buku_besar_m->update($row->id_buku_besar, [
+					'saldo_debit'	=> $row->saldo_debit,
+					'saldo_kredit'	=> $row->saldo_kredit
+				]);
+			}
 			exit;
 		}
 
@@ -1054,40 +1562,135 @@ class Admin extends MY_Controller{
 
 			$this->angsuran_m->insert($this->data['angsuran']);
 
-			$this->data['getAngsuran']	= $this->angsuran_m->get_last_row();
-			
-			$this->data['entri1'] = [
-				'id_relasi3'	=> $this->data['getAngsuran']->id_angsuran,
-				'tgl'			=> $this->data['angsuran']['tgl_angsuran'],
-				'ket'			=> 'Angsuran',
-				'debit'			=> $this->data['angsuran']['jlh_dibayar'],
-				'kredit'		=> 0
-			];
-
-			$this->jurnal_umum_m->insert($this->data['entri1']);
-
-			$cek = $this->buku_besar_m->get_last_row();
-
-			if(!isset($cek)){
-				$saldo_debit 	= $this->POST('jlh_dibayar');
+			$this->load->model('jurnal_umum_m');
+			$check_jurnal_umum = $this->jurnal_umum_m->get_row(['id_aktivitas' => 3, 'tgl' => $this->data['angsuran']['tgl_angsuran']]);
+			if (isset($check_jurnal_umum))
+			{
+				$this->jurnal_umum_m->update($check_jurnal_umum->id_jurnal, [
+					'debit' 	=> $check_jurnal_umum->debit + $this->data['angsuran']['jlh_dibayar']
+				]);
 			}
-			if(isset($cek)){
-				$last_saldo_debit 	= $this->buku_besar_m->get_last_row()->saldo_debit;
-				$saldo_debit		= $last_saldo_debit + $this->POST('jlh_dibayar');
+			else
+			{
+				$this->data['entri'] = [
+					'tgl'			=> $this->data['angsuran']['tgl_angsuran'],
+					'ket'			=> 'Angsuran',
+					'debit'			=> $this->data['angsuran']['jlh_dibayar'],
+					'kredit'		=> 0,
+					'id_aktivitas'	=> 3
+				];
+				$this->jurnal_umum_m->insert($this->data['entri']);
 			}
 
-			$this->data['entri2'] = [
-				'id_relasi3'	=> $this->data['getAngsuran']->id_angsuran,
-				'tgl'			=> $this->data['angsuran']['tgl_angsuran'],
-				'ket'			=> 'Angsuran',
-				'ref'			=> '106',
-				'debit'			=> $this->data['angsuran']['jlh_dibayar'],
-				'kredit'		=> 0,
-				'saldo_debit'	=> $saldo_debit,
-				'saldo_kredit'	=> 0 
-			];
-			
-			$this->buku_besar_m->insert($this->data['entri2']);
+			$this->load->model('buku_besar_m');
+			$temp = $this->buku_besar_m->get_last_row(['tgl <' => $this->data['angsuran']['tgl_angsuran']], 'tgl');
+			if (isset($temp))
+				$this->data['saldo_debit'] 	= $temp->saldo_debit;
+			if (!isset($this->data['saldo_debit']))
+				$this->data['saldo_debit'] = 0;
+			if (isset($temp))
+				$this->data['saldo_kredit']	= $temp->saldo_kredit;
+			if (!isset($this->data['saldo_kredit']))
+				$this->data['saldo_kredit'] = 0;
+			if (isset($this->data['saldo_kredit']) && $this->data['saldo_kredit'] > 0)
+			{
+				$this->data['saldo_kredit'] -= $this->data['angsuran']['jlh_dibayar'];
+				if ($this->data['saldo_kredit'] < 0)
+				{
+					$this->data['saldo_debit'] = $this->data['saldo_kredit'] * (-1);
+					$this->data['saldo_kredit'] 	= 0;
+				}
+			}
+			else if (isset($this->data['saldo_debit']) && $this->data['saldo_debit'] >= 0)
+			{
+				$this->data['saldo_debit'] += $this->data['angsuran']['jlh_dibayar'];
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $this->data['angsuran']['tgl_angsuran'], 'id_aktivitas' => 3]);
+			if (isset($check_buku_besar))
+			{
+				if ($check_buku_besar->saldo_kredit > 0)
+				{
+					$check_buku_besar->saldo_kredit -= $this->data['angsuran']['jlh_dibayar'];
+					if ($check_buku_besar->saldo_kredit < 0)
+					{
+						$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+						$check_buku_besar->saldo_kredit = 0;
+					}
+				}
+				else
+				{
+					$check_buku_besar->saldo_debit += $this->data['angsuran']['jlh_dibayar'];
+				}
+
+				$data = [
+					'debit'		=> $check_buku_besar->debit + $this->data['angsuran']['jlh_dibayar'],
+					'saldo_kredit'	=> $check_buku_besar->saldo_kredit,
+					'saldo_debit'	=> $check_buku_besar->saldo_debit
+				];
+
+				$this->buku_besar_m->update($check_buku_besar->id_buku_besar, $data);
+			}
+			else
+			{
+				$this->data['entri'] = [
+					'tgl'			=> $this->data['angsuran']['tgl_angsuran'],
+					'ket'			=> 'Angsuran',
+					'ref'			=> '106',
+					'debit'			=> $this->data['angsuran']['jlh_dibayar'],
+					'kredit'		=> 0,
+					'saldo_debit'	=> $this->data['saldo_debit'],
+					'saldo_kredit'	=> $this->data['saldo_kredit'],
+					'id_aktivitas'	=> 3
+				];
+
+				$this->buku_besar_m->insert($this->data['entri']);
+			}
+
+			// update data pada tgl yg sama namun id_aktivitas yg berbeda
+			$check_buku_besar = $this->buku_besar_m->get(['tgl' => $this->data['angsuran']['tgl_angsuran'], 'id_aktivitas !=' => 3]);
+			foreach ($check_buku_besar as $row)
+			{
+				$saldo_debit = $row->saldo_debit;
+				$saldo_kredit = $row->saldo_kredit;
+				$data = [];
+
+				if ($saldo_kredit > 0)
+				{
+					$data['saldo_kredit'] = $saldo_kredit - $this->data['angsuran']['jlh_dibayar'];
+					if ($data['saldo_kredit'] < 0)
+					{
+						$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+						$data['saldo_kredit'] = 0;
+					}
+				}
+				else
+					$data['saldo_debit'] = $saldo_debit + $this->data['angsuran']['jlh_dibayar'];
+
+				$this->buku_besar_m->update($row->id_buku_besar, $data);
+			}
+
+			$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $this->data['angsuran']['tgl_angsuran']]);
+			foreach ($check_buku_besar as $row)
+			{
+				$saldo_debit = $row->saldo_debit;
+				$saldo_kredit = $row->saldo_kredit;
+				$data = [];
+
+				if ($saldo_kredit > 0)
+				{
+					$data['saldo_kredit'] = $saldo_kredit - $this->data['angsuran']['jlh_dibayar'];
+					if ($data['saldo_kredit'] < 0)
+					{
+						$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+						$data['saldo_kredit'] = 0;
+					}
+				}
+				else
+					$data['saldo_debit'] = $saldo_debit + $this->data['angsuran']['jlh_dibayar'];
+
+				$this->buku_besar_m->update($row->id_buku_besar, $data);
+			}
 
 			$this->flashmsg('Data angsuran berhasil disimpan');
 			redirect('admin/data_angsuran');
@@ -1096,6 +1699,13 @@ class Admin extends MY_Controller{
 
 		if ($this->POST('edit') && $this->POST('edit_id_angsuran'))
 		{
+			$angsuran_bfr = $this->angsuran_m->get_row(['id_angsuran' => $this->POST('edit_id_angsuran')]);
+
+			$jlh_dibayar_bfr 	= $angsuran_bfr->jlh_dibayar;
+			$tanggal_bfr 		= $angsuran_bfr->tgl_angsuran;
+			$jlh_dibayar_aft 	= $this->POST('edit_jlh_dibayar');
+			$tanggal_aft 		= $this->POST('edit_tgl_angsuran');
+
 			$this->data['angsuran'] = [
 				'id_pinjaman'		=> $this->POST('edit_id_pinjaman'),
 				'tgl_angsuran'		=> $this->POST('edit_tgl_angsuran'),
@@ -1103,38 +1713,1611 @@ class Admin extends MY_Controller{
 				'sisa_angsuran'		=> $this->POST('edit_sisa_angsuran')
 			];
 
-			// update jurnal umum angsuran
-			$this->data['entri1'] = [
-				'tgl'			=> $this->POST('edit_tgl_angsuran'),
-				'ket'			=> 'Angsuran',
-				'debit'			=>  $this->POST('edit_jlh_dibayar'),
-				'kredit'		=> 0
-			];
-
-			// update buku besar angsuran
-			$cek = $this->buku_besar_m->get_previous_row('id_relasi3', $this->POST('edit_id_angsuran'));
-
-			if(!isset($cek)){
-				$saldo_debit 	= $this->POST('edit_jlh_dibayar');
-			}
-			if(isset($cek)){
-				$prev_saldo_debit 	= $cek->saldo_debit;
-				$saldo_debit		= $prev_saldo_debit + $this->POST('edit_jlh_dibayar');
-			}
-
-			$this->data['entri2'] = [
-				'tgl'			=> $this->POST('edit_tgl_angsuran'),
-				'ket'			=> 'Angsuran',
-				'ref'			=> '106',
-				'debit'			=> $this->POST('edit_jlh_dibayar'),
-				'kredit'		=> 0,
-				'saldo_debit'	=> $saldo_debit,
-				'saldo_kredit'	=> 0 
-			];
-
 			$this->angsuran_m->update($this->POST('edit_id_angsuran'), $this->data['angsuran']);
-			$this->jurnal_umum_m->update_where(['id_relasi3' => $this->POST('edit_id_angsuran')], $this->data['entri1']);
-			$this->buku_besar_m->update_where(['id_relasi3' => $this->POST('edit_id_angsuran')], $this->data['entri2']);
+
+			$this->load->model('jurnal_umum_m');
+			$this->load->model('buku_besar_m');
+
+			$check_jurnal_umum_bfr = $this->jurnal_umum_m->get_row([
+				'tgl'			=> $tanggal_bfr,
+				'id_aktivitas'	=> 3
+			]);
+
+			if ($tanggal_aft != $tanggal_bfr && $jlh_dibayar_aft != $jlh_dibayar_bfr)
+			{
+				if (isset($check_jurnal_umum_bfr))
+				{
+					$debit = $check_jurnal_umum_bfr->debit - $jlh_dibayar_bfr;
+					if ($debit <= 0)
+						$this->jurnal_umum_m->delete($check_jurnal_umum_bfr->id_jurnal);
+					else
+					{
+						$this->jurnal_umum_m->update_where([
+							'tgl'			=> $tanggal_bfr,
+							'id_aktivitas'	=> 3
+						], [
+							'debit'			=> $debit
+						]);
+					}
+				}
+
+				$check_jurnal_umum_aft = $this->jurnal_umum_m->get_row([
+					'tgl'			=> $tanggal_aft,
+					'id_aktivitas'	=> 3
+				]);
+
+				if (isset($check_simpanan_aft))
+				{
+					$this->jurnal_umum_m->update($check_jurnal_umum_aft->id_jurnal, [
+						'debit'	=> $check_jurnal_umum_aft->debit + $jlh_dibayar_aft
+					]);
+				}
+				else
+				{
+					$this->data['entri'] = [
+						'tgl'			=> $tanggal_aft,
+						'ket'			=> 'Angsuran',
+						'debit'			=> $jlh_dibayar_aft,
+						'kredit'		=> 0,
+						'id_aktivitas'	=> 3
+					];
+					$this->jurnal_umum_m->insert($this->data['entri']);
+				}
+
+				$check_buku_besar_bfr = $this->buku_besar_m->get_row([
+					'tgl'			=> $tanggal_bfr,
+					'id_aktivitas'	=> 3
+				]);
+				if ($tanggal_aft > $tanggal_bfr && $jlh_dibayar_aft > $jlh_dibayar_bfr)
+				{
+					// case 5
+					$data = [];
+					$data['debit'] 			= $check_buku_besar_bfr->debit - $jlh_dibayar_bfr;
+					$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+					$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
+					if ($check_buku_besar_bfr->saldo_debit > 0)
+					{
+						$data['saldo_debit'] -= $jlh_dibayar_bfr;
+						if ($data['saldo_debit'] < 0)
+						{
+							$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+							$data['saldo_debit'] = 0;
+						}
+					}
+					else
+						$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+					if ($data['debit'] <= 0)
+						$this->buku_besar_m->delete($check_buku_besar_bfr->id_buku_besar);
+					else
+					{
+						$this->buku_besar_m->update_where([
+							'tgl'			=> $tanggal_bfr,
+							'id_aktivitas'	=> 3
+						], $data);
+					}
+
+					$check_buku_besar_bfr = $this->buku_besar_m->get([
+						'tgl'				=> $tanggal_bfr,
+						'id_aktivitas !='	=> 3,
+						'id_buku_besar >'	=> $check_buku_besar_bfr->id_buku_besar
+					]);
+					foreach ($check_buku_besar_bfr as $row)
+					{
+						$data = [];
+						$data['saldo_debit']	= $row->saldo_debit;
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						if ($row->saldo_debit > 0)
+						{
+							$data['saldo_debit'] -= $jlh_dibayar_bfr;
+							if ($data['saldo_debit'] < 0)
+							{
+								$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+								$data['saldo_debit'] = 0;
+							}
+						}
+						else
+							$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar_itr = $this->buku_besar_m->get(['tgl >' => $tanggal_bfr, 'tgl <' => $tanggal_aft]);
+					foreach ($check_buku_besar_itr as $row)
+					{
+						$data = [];
+						$data['saldo_debit']	= $row->saldo_debit;
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						if ($row->saldo_debit > 0)
+						{
+							$data['saldo_debit'] -= $jlh_dibayar_bfr;
+							if ($data['saldo_debit'] < 0)
+							{
+								$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+								$data['saldo_debit'] = 0;
+							}
+						}
+						else
+							$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+					$id_buku_besar = -1;
+					if (isset($check_buku_besar))
+					{
+						if ($check_buku_besar->saldo_kredit > 0)
+						{
+							$check_buku_besar->saldo_kredit -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+							if ($check_buku_besar->saldo_kredit < 0)
+							{
+								$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+								$check_buku_besar->saldo_kredit = 0;
+							}	
+						}
+						else
+							$check_buku_besar->saldo_debit += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+						
+						$this->buku_besar_m->update($check_buku_besar->id_buku_besar, [
+							'debit'			=> $check_buku_besar->debit + $jlh_dibayar_aft,
+							'saldo_debit' 	=> $check_buku_besar->saldo_debit,
+							'saldo_kredit' 	=> $check_buku_besar->saldo_kredit
+						]);
+						$id_buku_besar = $check_buku_besar->id_buku_besar;
+
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar <' => $id_buku_besar, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_debit > 0)
+							{
+								$row->saldo_debit -= $jlh_dibayar_bfr;
+								if ($row->saldo_debit < 0)
+								{
+									$row->saldo_kredit = $row->saldo_debit * (-1);
+									$row->saldo_debit = 0;
+								}
+							}
+							else
+								$row->saldo_kredit += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+					}
+					else
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						$id = -1;
+						if (!isset($last_row))
+							$id = 1;
+						else
+							$id = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_debit > 0)
+							{
+								$row->saldo_debit -= $jlh_dibayar_bfr;
+								if ($row->saldo_debit < 0)
+								{
+									$row->saldo_kredit = $row->saldo_debit * (-1);
+									$row->saldo_debit = 0;
+								}
+							}
+							else
+								$row->saldo_kredit += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
+						if (isset($last_row))
+						{
+							$saldo_debit 	= 0;
+							$saldo_kredit 	= 0;
+							if ($last_row->saldo_kredit > 0)
+							{
+								$saldo_kredit = $last_row->saldo_kredit - $jlh_dibayar_aft;
+								if ($saldo_kredit < 0)
+								{
+									$saldo_debit = $saldo_kredit * (-1);
+									$saldo_kredit = 0;
+								}
+							}
+							else
+								$saldo_debit = $last_row->saldo_debit + $jlh_dibayar_aft;
+
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $saldo_debit,
+								'saldo_kredit'	=> $saldo_kredit,
+								'id_aktivitas'	=> 3
+							];
+						}
+						else
+						{
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $jlh_dibayar_aft,
+								'saldo_kredit'	=> 0,
+								'id_aktivitas'	=> 3
+							];
+						}
+						$this->buku_besar_m->insert($this->data['entri']);
+						$id_buku_besar = $this->db->insert_id();
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_aft, 'id_aktivitas !=' => 3, 'id_buku_besar >' => $id_buku_besar]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_kredit > 0)
+						{
+							$row->saldo_kredit -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+							if ($row->saldo_kredit < 0)
+							{
+								$row->saldo_debit = $row->saldo_kredit * (-1);
+								$row->saldo_kredit = 0;
+							}
+						}
+						else
+							$row->saldo_debit += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_kredit'	=> $row->saldo_kredit,
+							'saldo_debit'	=> $row->saldo_debit
+						]);
+					}
+				
+					$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal_aft]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_kredit > 0)
+						{
+							$row->saldo_kredit -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+							if ($row->saldo_kredit < 0)
+							{
+								$row->saldo_debit = $row->saldo_kredit * (-1);
+								$row->saldo_kredit = 0;
+							}
+						}
+						else
+							$row->saldo_debit += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_kredit'	=> $row->saldo_kredit,
+							'saldo_debit'	=> $row->saldo_debit
+						]);
+					}
+				}
+				else if ($tanggal_aft > $tanggal_bfr && $jlh_dibayar_aft < $jlh_dibayar_bfr)
+				{
+					// case 6
+					$data = [];
+					$data['debit'] 			= $check_buku_besar_bfr->debit - $jlh_dibayar_bfr;
+					$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+					$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
+					if ($check_buku_besar_bfr->saldo_debit > 0)
+					{
+						$data['saldo_debit'] -= $jlh_dibayar_bfr;
+						if ($data['saldo_debit'] < 0)
+						{
+							$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+							$data['saldo_debit'] = 0;
+						}
+					}
+					else
+						$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+					if ($data['debit'] <= 0)
+						$this->buku_besar_m->delete($check_buku_besar_bfr->id_buku_besar);
+					else
+					{
+						$this->buku_besar_m->update_where([
+							'tgl'			=> $tanggal_bfr,
+							'id_aktivitas'	=> 3
+						], $data);
+					}
+
+					$check_buku_besar_bfr = $this->buku_besar_m->get([
+						'tgl'				=> $tanggal_bfr,
+						'id_aktivitas !='	=> 3,
+						'id_buku_besar >'	=> $check_buku_besar_bfr->id_buku_besar
+					]);
+					foreach ($check_buku_besar_bfr as $row)
+					{
+						$data = [];
+						$data['saldo_debit']	= $row->saldo_debit;
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						if ($row->saldo_debit > 0)
+						{
+							$data['saldo_debit'] -= $jlh_dibayar_bfr;
+							if ($data['saldo_debit'] < 0)
+							{
+								$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+								$data['saldo_debit'] = 0;
+							}
+						}
+						else
+							$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar_itr = $this->buku_besar_m->get(['tgl >' => $tanggal_bfr, 'tgl <' => $tanggal_aft]);
+					foreach ($check_buku_besar_itr as $row)
+					{
+						$data = [];
+						$data['saldo_debit']	= $row->saldo_debit;
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						if ($row->saldo_debit > 0)
+						{
+							$data['saldo_debit'] -= $jlh_dibayar_bfr;
+							if ($data['saldo_debit'] < 0)
+							{
+								$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+								$data['saldo_debit'] = 0;
+							}
+						}
+						else
+							$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+					$id_buku_besar = -1;
+					if (isset($check_buku_besar))
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						$id = -1;
+						if (!isset($last_row))
+							$id = 1;
+						else
+							$id = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_debit > 0)
+							{
+								$row->saldo_debit -= $jlh_dibayar_bfr;
+								if ($row->saldo_debit < 0)
+								{
+									$row->saldo_kredit = $row->saldo_debit * (-1);
+									$row->saldo_debit = 0;
+								}
+							}
+							else
+								$row->saldo_kredit += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+
+						if ($check_buku_besar->saldo_debit > 0)
+						{
+							$check_buku_besar->saldo_debit += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+							if ($check_buku_besar->saldo_debit < 0)
+							{
+								$check_buku_besar->saldo_kredit = $check_buku_besar->saldo_debit * (-1);
+								$check_buku_besar->saldo_debit = 0;	
+							}
+						}
+						else
+							$check_buku_besar->saldo_kredit -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);				
+						$this->buku_besar_m->update($check_buku_besar->id_buku_besar, [
+							'debit'			=> $check_buku_besar->debit + $jlh_dibayar_aft,
+							'saldo_debit' 	=> $check_buku_besar->saldo_debit,
+							'saldo_kredit' 	=> $check_buku_besar->saldo_kredit
+						]);
+						$id_buku_besar = $check_buku_besar->id_buku_besar;
+					}
+					else
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						$id = -1;
+						if (!isset($last_row))
+							$id = 1;
+						else
+							$id = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_debit > 0)
+							{
+								$row->saldo_debit -= $jlh_dibayar_bfr;
+								if ($row->saldo_debit < 0)
+								{
+									$row->saldo_kredit = $row->saldo_debit * (-1);
+									$row->saldo_debit = 0;
+								}
+							}
+							else
+								$row->saldo_kredit += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
+						if (isset($last_row))
+						{
+							$saldo_debit 	= 0;
+							$saldo_kredit 	= 0;
+							if ($last_row->saldo_kredit > 0)
+							{
+								$saldo_kredit = $last_row->saldo_kredit - $jlh_dibayar_aft;
+								if ($saldo_kredit < 0)
+								{
+									$saldo_debit = $saldo_kredit * (-1);
+									$saldo_kredit = 0;
+								}
+							}
+							else
+								$saldo_debit = $last_row->saldo_debit + $jlh_dibayar_aft;
+
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $saldo_debit,
+								'saldo_kredit'	=> $saldo_kredit,
+								'id_aktivitas'	=> 3
+							];
+						}
+						else
+						{
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $jlh_dibayar_aft,
+								'saldo_kredit'	=> 0,
+								'id_aktivitas'	=> 3
+							];
+						}
+						$this->buku_besar_m->insert($this->data['entri']);
+						$id_buku_besar = $this->db->insert_id();
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_aft, 'id_aktivitas !=' => 3, 'id_buku_besar >' => $id_buku_besar]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_debit > 0)
+						{
+							$row->saldo_debit -= ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+							if ($row->saldo_debit < 0)
+							{
+								$row->saldo_kredit = $row->saldo_debit * (-1);
+								$row->saldo_debit = 0;
+							}
+						}
+						else
+							$row->saldo_kredit += ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_kredit'	=> $row->saldo_kredit,
+							'saldo_debit'	=> $row->saldo_debit
+						]);
+					}
+				
+					$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal_aft]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_debit > 0)
+						{
+							$row->saldo_debit -= ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+							if ($row->saldo_debit < 0)
+							{
+								$row->saldo_kredit = $row->saldo_debit * (-1);
+								$row->saldo_debit = 0;
+							}
+						}
+						else
+							$row->saldo_kredit += ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_kredit'	=> $row->saldo_kredit,
+							'saldo_debit'	=> $row->saldo_debit
+						]);
+					}
+				}
+				else if ($tanggal_aft < $tanggal_bfr && $jlh_dibayar_aft > $jlh_dibayar_bfr)
+				{
+					// case 7
+					$data = [];
+					$data['debit'] 			= $check_buku_besar_bfr->debit - $jlh_dibayar_bfr;
+					$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+					$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
+					if ($check_buku_besar_bfr->saldo_kredit > 0)
+					{
+						$data['saldo_kredit'] -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+						if ($data['saldo_kredit'] < 0)
+						{
+							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+							$data['saldo_kredit'] = 0;
+						}
+					}
+					else
+						$data['saldo_debit'] += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+
+					if ($data['debit'] <= 0)
+						$this->buku_besar_m->delete($check_buku_besar_bfr->id_buku_besar);
+					else
+					{
+						$this->buku_besar_m->update_where([
+							'tgl'			=> $tanggal_bfr,
+							'id_aktivitas'	=> 3
+						], $data);
+					}
+
+					$check_buku_besar_bfr = $this->buku_besar_m->get([
+						'tgl'				=> $tanggal_bfr,
+						'id_aktivitas !='	=> 3,
+						'id_buku_besar <'	=> $check_buku_besar_bfr->id_buku_besar
+					]);
+					foreach ($check_buku_besar_bfr as $row)
+					{
+						$data = [];
+						$data['saldo_debit']	= $row->saldo_debit;
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						if ($row->saldo_kredit > 0)
+						{
+							$data['saldo_kredit'] -= $jlh_dibayar_aft;
+							if ($data['saldo_kredit'] < 0)
+							{
+								$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+								$data['saldo_kredit'] = 0;
+							}
+						}
+						else
+							$data['saldo_debit'] += $jlh_dibayar_aft;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar_itr = $this->buku_besar_m->get(['tgl <' => $tanggal_bfr, 'tgl >' => $tanggal_aft]);
+					foreach ($check_buku_besar_itr as $row)
+					{
+						$data = [];
+						$data['saldo_debit']	= $row->saldo_debit;
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						if ($row->saldo_kredit > 0)
+						{
+							$data['saldo_kredit'] -= $jlh_dibayar_aft;
+							if ($data['saldo_kredit'] < 0)
+							{
+								$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+								$data['saldo_kredit'] = 0;
+							}
+						}
+						else
+							$data['saldo_debit'] += $jlh_dibayar_aft;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+					$id_buku_besar = -1;
+					if (isset($check_buku_besar))
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						$id = -1;
+						if (!isset($last_row))
+							$id = 1;
+						else
+							$id = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar >' => $id, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_kredit > 0)
+							{
+								$row->saldo_kredit -= $jlh_dibayar_aft;
+								if ($row->saldo_kredit < 0)
+								{
+									$row->saldo_debit = $row->saldo_kredit * (-1);
+									$row->saldo_kredit = 0;
+								}
+							}
+							else
+								$row->saldo_debit += $jlh_dibayar_aft;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+
+						if ($check_buku_besar->saldo_kredit > 0)
+						{
+							$check_buku_besar->saldo_kredit -= $jlh_dibayar_aft;
+							if ($check_buku_besar->saldo_kredit < 0)
+							{
+								$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+								$check_buku_besar->saldo_kredit = 0;	
+							}
+						}
+						else
+							$check_buku_besar->saldo_debit += $jlh_dibayar_aft;
+
+						$this->buku_besar_m->update($check_buku_besar->id_buku_besar, [
+							'debit'			=> $check_buku_besar->debit + $jlh_dibayar_aft,
+							'saldo_debit' 	=> $check_buku_besar->saldo_debit,
+							'saldo_kredit' 	=> $check_buku_besar->saldo_kredit
+						]);
+						$id_buku_besar = $check_buku_besar->id_buku_besar;
+					}
+					else
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						$id = -1;
+						if (!isset($last_row))
+							$id = 1;
+						else
+							$id = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar >' => $id, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_kredit > 0)
+							{
+								$row->saldo_kredit -= $jlh_dibayar_aft;
+								if ($row->saldo_kredit < 0)
+								{
+									$row->saldo_debit = $row->saldo_kredit * (-1);
+									$row->saldo_kredit = 0;
+								}
+							}
+							else
+								$row->saldo_debit += $jlh_dibayar_aft;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
+						if (isset($last_row))
+						{
+							$saldo_debit 	= 0;
+							$saldo_kredit 	= 0;
+							if ($last_row->saldo_kredit > 0)
+							{
+								$saldo_kredit = $last_row->saldo_kredit - $jlh_dibayar_aft;
+								if ($saldo_kredit < 0)
+								{
+									$saldo_debit = $saldo_kredit * (-1);
+									$saldo_kredit = 0;
+								}
+							}
+							else
+								$saldo_debit = $last_row->saldo_debit + $jlh_dibayar_aft;
+
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $saldo_debit,
+								'saldo_kredit'	=> $saldo_kredit,
+								'id_aktivitas'	=> 3
+							];
+						}
+						else
+						{
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $jlh_dibayar_aft,
+								'saldo_kredit'	=> 0,
+								'id_aktivitas'	=> 3
+							];
+						}
+						$this->buku_besar_m->insert($this->data['entri']);
+						$id_buku_besar = $this->db->insert_id();
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal_bfr]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_kredit > 0)
+						{
+							$row->saldo_kredit -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+							if ($row->saldo_kredit < 0)
+							{
+								$row->saldo_debit = $row->saldo_kredit * (-1);
+								$row->saldo_kredit = 0;
+							}
+						}
+						else
+							$row->saldo_debit += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_kredit'	=> $row->saldo_kredit,
+							'saldo_debit'	=> $row->saldo_debit
+						]);
+					}
+				}
+				else
+				{
+					// case 8
+					$data = [];
+					$data['debit'] 			= $check_buku_besar_bfr->debit - $jlh_dibayar_bfr;
+					$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
+					$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+					if ($check_buku_besar_bfr->saldo_debit > 0)
+					{
+						$data['saldo_debit'] -= ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+						if ($data['saldo_debit'] < 0)
+						{
+							$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+							$data['saldo_debit'] = 0;
+						}
+					}
+					else
+						$data['saldo_kredit'] += ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+
+					if ($data['debit'] <= 0)
+						$this->buku_besar_m->delete($check_buku_besar_bfr->id_buku_besar);
+					else
+					{
+						$this->buku_besar_m->update_where([
+							'tgl'			=> $tanggal_bfr,
+							'id_aktivitas'	=> 3
+						], $data);
+					}
+
+					$check_buku_besar_bfr = $this->buku_besar_m->get([
+						'tgl'				=> $tanggal_bfr,
+						'id_aktivitas !='	=> 3,
+						'id_buku_besar <'	=> $check_buku_besar_bfr->id_buku_besar
+					]);
+					foreach ($check_buku_besar_bfr as $row)
+					{
+						$data = [];
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						$data['saldo_debit']	= $row->saldo_debit;
+						if ($row->saldo_kredit > 0)
+						{
+							$data['saldo_kredit'] -= $jlh_dibayar_aft;
+							if ($data['saldo_kredit'] < 0)
+							{
+								$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+								$data['saldo_kredit'] = 0;
+							}
+						}
+						else
+							$data['saldo_debit'] += $jlh_dibayar_aft;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar_itr = $this->buku_besar_m->get(['tgl <' => $tanggal_bfr, 'tgl >' => $tanggal_aft]);
+					foreach ($check_buku_besar_itr as $row)
+					{
+						$data = [];
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						$data['saldo_debit']	= $row->saldo_debit;
+						if ($row->saldo_kredit > 0)
+						{
+							$data['saldo_kredit'] -= $jlh_dibayar_aft;
+							if ($data['saldo_kredit'] < 0)
+							{
+								$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+								$data['saldo_kredit'] = 0;
+							}
+						}
+						else
+							$data['saldo_debit'] += $jlh_dibayar_aft;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+					$id_buku_besar = -1;
+					if (isset($check_buku_besar))
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						if (!isset($last_row))
+							$id_buku_besar = 1;
+						else
+							$id_buku_besar = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar >' => $id_buku_besar, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_kredit > 0)
+							{
+								$row->saldo_kredit -= $jlh_dibayar_aft;
+								if ($row->saldo_kredit < 0)
+								{
+									$row->saldo_debit = $row->saldo_kredit * (-1);
+									$row->saldo_kredit = 0;
+								}
+							}
+							else
+								$row->saldo_debit += $jlh_dibayar_aft;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+
+						if ($check_buku_besar->saldo_kredit > 0)
+						{
+							$check_buku_besar->saldo_kredit -= $jlh_dibayar_aft;
+							if ($check_buku_besar->saldo_kredit < 0)
+							{
+								$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+								$check_buku_besar->saldo_kredit = 0;
+							}	
+						}
+						else
+							$check_buku_besar->saldo_debit += $jlh_dibayar_aft;
+
+						$this->buku_besar_m->update($check_buku_besar->id_buku_besar, [
+							'debit'			=> $check_buku_besar->debit + $jlh_dibayar_aft,
+							'saldo_debit' 	=> $check_buku_besar->saldo_debit,
+							'saldo_kredit' 	=> $check_buku_besar->saldo_kredit
+						]);
+						$id_buku_besar = $check_buku_besar->id_buku_besar;
+					}
+					else
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						if (!isset($last_row))
+							$id_buku_besar = 1;
+						else
+							$id_buku_besar = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar >' => $id_buku_besar, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_kredit > 0)
+							{
+								$row->saldo_kredit -= $jlh_dibayar_aft;
+								if ($row->saldo_kredit < 0)
+								{
+									$row->saldo_debit = $row->saldo_kredit * (-1);
+									$row->saldo_kredit = 0;
+								}
+							}
+							else
+								$row->saldo_debit += $jlh_dibayar_aft;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
+						if (isset($last_row))
+						{
+							$saldo_debit 	= 0;
+							$saldo_kredit 	= 0;
+							if ($last_row->saldo_kredit > 0)
+							{
+								$saldo_kredit = $last_row->saldo_kredit - $jlh_dibayar_aft;
+								if ($saldo_kredit < 0)
+								{
+									$saldo_debit = $saldo_kredit * (-1);
+									$saldo_kredit = 0;
+								}
+							}
+							else
+								$saldo_debit = $last_row->saldo_debit + $jlh_dibayar_aft;
+
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $saldo_debit,
+								'saldo_kredit'	=> $saldo_kredit,
+								'id_aktivitas'	=> 3
+							];
+						}
+						else
+						{
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $jlh_dibayar_aft,
+								'saldo_kredit'	=> 0,
+								'id_aktivitas'	=> 3
+							];
+						}
+						$this->buku_besar_m->insert($this->data['entri']);
+						$id_buku_besar = $this->db->insert_id();
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal_bfr]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_debit > 0)
+						{
+							$row->saldo_debit -= ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+							if ($row->saldo_debit < 0)
+							{
+								$row->saldo_kredit = $row->saldo_debit * (-1);
+								$row->saldo_debit = 0;
+							}
+						}
+						else
+							$row->saldo_kredit += ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_kredit'	=> $row->saldo_kredit,
+							'saldo_debit'	=> $row->saldo_debit
+						]);
+					}
+				}
+			}
+			else
+			{
+				$check_buku_besar_bfr = $this->buku_besar_m->get_row([
+					'tgl'			=> $tanggal_bfr,
+					'id_aktivitas'	=> 3
+				]);
+				if ($tanggal_aft > $tanggal_bfr)
+				{
+					// case 1
+					if (isset($check_jurnal_umum_bfr))
+					{
+						$debit = $check_jurnal_umum_bfr->debit - $jlh_dibayar_bfr;
+						if ($debit <= 0)
+							$this->jurnal_umum_m->delete($check_jurnal_umum_bfr->id_jurnal);
+						else
+						{
+							$this->jurnal_umum_m->update_where([
+								'tgl'			=> $tanggal_bfr,
+								'id_aktivitas'	=> 3
+							], [
+								'debit'			=> $debit
+							]);
+						}
+					}
+
+					$check_jurnal_umum_aft = $this->jurnal_umum_m->get_row([
+						'tgl'			=> $tanggal_aft,
+						'id_aktivitas'	=> 3
+					]);
+
+					if (isset($check_simpanan_aft))
+					{
+						$this->jurnal_umum_m->update($check_jurnal_umum_aft->id_jurnal, [
+							'debit'	=> $check_jurnal_umum_aft->debit + $jlh_dibayar_aft
+						]);
+					}
+					else
+					{
+						$this->data['entri'] = [
+							'tgl'			=> $tanggal_aft,
+							'ket'			=> 'Angsuran',
+							'debit'			=> $jlh_dibayar_aft,
+							'kredit'		=> 0,
+							'id_aktivitas'	=> 3
+						];
+						$this->jurnal_umum_m->insert($this->data['entri']);
+					}
+
+					if (isset($check_buku_besar_bfr))
+					{
+						$data = [];
+						$data['debit'] 			= $check_buku_besar_bfr->debit - $jlh_dibayar_bfr;
+						$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+						$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
+						if ($check_buku_besar_bfr->saldo_debit > 0)
+						{
+							$data['saldo_debit'] -= $jlh_dibayar_bfr;
+							if ($data['saldo_debit'] < 0)
+							{
+								$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+								$data['saldo_debit'] = 0;
+							}
+						}
+						else
+							$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+						if ($data['debit'] <= 0)
+							$this->buku_besar_m->delete($check_buku_besar_bfr->id_buku_besar);
+						else
+						{
+							$this->buku_besar_m->update_where([
+								'tgl'			=> $tanggal_bfr,
+								'id_aktivitas'	=> 3
+							], $data);
+						}
+					}
+
+					$check_buku_besar_bfr = $this->buku_besar_m->get([
+						'tgl'				=> $tanggal_bfr,
+						'id_aktivitas !='	=> 3,
+						'id_buku_besar >'	=> $check_buku_besar_bfr->id_buku_besar
+					]);
+					if (isset($check_buku_besar_bfr))
+					{
+						foreach ($check_buku_besar_bfr as $row)
+						{
+							$data = [];
+							$data['saldo_debit']	= $row->saldo_debit;
+							$data['saldo_kredit']	= $row->saldo_kredit;
+							if ($row->saldo_debit > 0)
+							{
+								$data['saldo_debit'] -= $jlh_dibayar_bfr;
+								if ($data['saldo_debit'] < 0)
+								{
+									$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+									$data['saldo_debit'] = 0;
+								}
+							}
+							else
+								$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, $data);
+						}
+					}
+
+					$check_buku_besar_itr = $this->buku_besar_m->get(['tgl >' => $tanggal_bfr, 'tgl <' => $tanggal_aft]);
+					foreach ($check_buku_besar_itr as $row)
+					{
+						$data = [];
+						$data['saldo_debit']	= $row->saldo_debit;
+						$data['saldo_kredit']	= $row->saldo_kredit;
+						if ($row->saldo_debit > 0)
+						{
+							$data['saldo_debit'] -= $jlh_dibayar_bfr;
+							if ($data['saldo_debit'] < 0)
+							{
+								$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+								$data['saldo_debit'] = 0;
+							}
+						}
+						else
+							$data['saldo_kredit'] += $jlh_dibayar_bfr;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+					$id_buku_besar = -1;
+					if (isset($check_buku_besar))
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						$id = -1;
+						if (!isset($last_row))
+							$id = 1;
+						else
+							$id = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_debit > 0)
+							{
+								$row->saldo_debit -= $jlh_dibayar_bfr;
+								if ($row->saldo_debit < 0)
+								{
+									$row->saldo_kredit = $row->saldo_debit * (-1);
+									$row->saldo_debit = 0;
+								}
+							}
+							else
+								$row->saldo_kredit += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <' => $tanggal_aft], 'tgl');
+
+						if ($last_row->saldo_kredit > 0)
+						{
+							$last_row->saldo_kredit -= $jlh_dibayar_aft;
+							if ($last_row->saldo_kredit < 0)
+							{
+								$last_row->saldo_debit = $last_row->saldo_kredit * (-1);
+								$last_row->saldo_kredit = 0;	
+							}
+						}
+						else
+							$last_row->saldo_debit += $jlh_dibayar_aft;
+
+						$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+
+						if ($last_row->saldo_kredit > 0)
+						{
+							$last_row->saldo_kredit -= $check_buku_besar->debit;
+							if ($last_row->saldo_kredit < 0)
+							{
+								$last_row->saldo_debit = $last_row->saldo_kredit * (-1);
+								$last_row->saldo_kredit = 0;	
+							}
+						}
+						else
+							$last_row->saldo_debit += $check_buku_besar->debit;
+
+						$this->buku_besar_m->update($check_buku_besar->id_buku_besar, [
+							'debit'			=> $check_buku_besar->debit + $jlh_dibayar_aft,
+							'saldo_debit'	=> $last_row->saldo_debit,
+							'saldo_kredit'	=> $last_row->saldo_kredit
+						]);
+						$id_buku_besar = $check_buku_besar->id_buku_besar;
+					}
+					else
+					{
+						$last_row = $this->buku_besar_m->get_last_row();
+						$id = -1;
+						if (!isset($last_row))
+							$id = 1;
+						else
+							$id = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							if ($row->saldo_debit > 0)
+							{
+								$row->saldo_debit -= $jlh_dibayar_bfr;
+								if ($row->saldo_debit < 0)
+								{
+									$row->saldo_kredit = $row->saldo_debit * (-1);
+									$row->saldo_debit = 0;
+								}
+							}
+							else
+								$row->saldo_kredit += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, [
+								'saldo_kredit'	=> $row->saldo_kredit,
+								'saldo_debit'	=> $row->saldo_debit
+							]);
+						}
+
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
+						if (isset($last_row))
+						{
+							$saldo_debit 	= 0;
+							$saldo_kredit 	= 0;
+							if ($last_row->saldo_kredit > 0)
+							{
+								$saldo_kredit = $last_row->saldo_kredit - $jlh_dibayar_aft;
+								if ($saldo_kredit < 0)
+								{
+									$saldo_debit = $saldo_kredit * (-1);
+									$saldo_kredit = 0;
+								}
+							}
+							else
+								$saldo_debit = $last_row->saldo_debit + $jlh_dibayar_aft;
+
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $saldo_debit,
+								'saldo_kredit'	=> $saldo_kredit,
+								'id_aktivitas'	=> 3
+							];
+						}
+						else
+						{
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $jlh_dibayar_aft,
+								'saldo_kredit'	=> 0,
+								'id_aktivitas'	=> 3
+							];
+						}
+						$this->buku_besar_m->insert($this->data['entri']);
+						$id_buku_besar = $this->db->insert_id();
+					}
+				}
+				else if ($tanggal_aft < $tanggal_bfr)
+				{
+					// case 2
+					if (isset($check_jurnal_umum_bfr))
+					{
+						$debit = $check_jurnal_umum_bfr->debit - $jlh_dibayar_bfr;
+						if ($debit <= 0)
+							$this->jurnal_umum_m->delete($check_jurnal_umum_bfr->id_jurnal);
+						else
+						{
+							$this->jurnal_umum_m->update_where([
+								'tgl'			=> $tanggal_bfr,
+								'id_aktivitas'	=> 3
+							], [
+								'debit'			=> $debit
+							]);
+						}
+					}
+
+					$check_jurnal_umum_aft = $this->jurnal_umum_m->get_row([
+						'tgl'			=> $tanggal_aft,
+						'id_aktivitas'	=> 3
+					]);
+
+					if (isset($check_simpanan_aft))
+					{
+						$this->jurnal_umum_m->update($check_jurnal_umum_aft->id_jurnal, [
+							'debit'	=> $check_jurnal_umum_aft->debit + $jlh_dibayar_aft
+						]);
+					}
+					else
+					{
+						$this->data['entri'] = [
+							'tgl'			=> $tanggal_aft,
+							'ket'			=> 'Angsuran',
+							'debit'			=> $jlh_dibayar_aft,
+							'kredit'		=> 0,
+							'id_aktivitas'	=> 3
+						];
+						$this->jurnal_umum_m->insert($this->data['entri']);
+					}
+
+					$data = [];
+					$data['debit'] 			= $check_buku_besar_bfr->debit - $jlh_dibayar_bfr;
+
+					if ($data['debit'] <= 0)
+						$this->buku_besar_m->delete($check_buku_besar_bfr->id_buku_besar);
+					else
+					{
+						$this->buku_besar_m->update_where([
+							'tgl'			=> $tanggal_bfr,
+							'id_aktivitas'	=> 3
+						], $data);
+					}
+
+					$check_buku_besar_bfr = $this->buku_besar_m->get([
+						'tgl'				=> $tanggal_bfr,
+						'id_aktivitas !='	=> 3,
+						'id_buku_besar <'	=> $check_buku_besar_bfr->id_buku_besar
+					]);
+					foreach ($check_buku_besar_bfr as $row)
+					{
+						$data = [];
+						$data['saldo_kredit'] 	= $row->saldo_kredit;
+						$data['saldo_debit']	= $row->saldo_debit;
+						if ($row->saldo_kredit > 0)
+						{
+							$data['saldo_kredit'] -= $jlh_dibayar_bfr;
+							if ($data['saldo_kredit'] < 0)
+							{
+								$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+								$data['saldo_kredit'] = 0;
+							}
+						}
+						else
+							$data['saldo_debit'] += $jlh_dibayar_bfr;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar_itr = $this->buku_besar_m->get(['tgl <' => $tanggal_bfr, 'tgl >' => $tanggal_aft]);
+					foreach ($check_buku_besar_itr as $row)
+					{
+						$data = [];
+						$data['saldo_kredit'] 	= $row->saldo_kredit;
+						$data['saldo_debit']	= $row->saldo_debit;
+						if ($row->saldo_kredit > 0)
+						{
+							$data['saldo_kredit'] -= $jlh_dibayar_bfr;
+							if ($data['saldo_kredit'] < 0)
+							{
+								$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+								$data['saldo_kredit'] = 0;
+							}
+						}
+						else
+							$data['saldo_debit'] += $jlh_dibayar_bfr;
+
+						$this->buku_besar_m->update($row->id_buku_besar, $data);
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 3]);
+					$id_buku_besar = -1;
+					if (isset($check_buku_besar))
+					{
+						if ($check_buku_besar->saldo_kredit > 0)
+						{
+							$check_buku_besar->saldo_kredit -= $jlh_dibayar_aft;
+							if ($check_buku_besar->saldo_kredit < 0)
+							{
+								$check_buku_besar->saldo_debit = $check_buku_besar->saldo_kredit * (-1);
+								$check_buku_besar->saldo_kredit = 0;
+							}
+						}
+						else
+							$check_buku_besar->saldo_debit += $jlh_dibayar_aft;
+						$this->buku_besar_m->update($check_buku_besar->id_buku_besar, [
+							'debit'			=> $check_buku_besar->debit + $jlh_dibayar_aft,
+							'saldo_debit'	=> $check_buku_besar->saldo_debit,
+							'saldo_kredit'	=> $check_buku_besar->saldo_kredit
+						]);
+						$id_buku_besar = $check_buku_besar->id_buku_besar;
+
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar >' => $id_buku_besar, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							$data = [];
+							$data['saldo_kredit'] 	= $row->saldo_kredit;
+							$data['saldo_debit']	= $row->saldo_debit;
+							if ($row->saldo_kredit > 0)
+							{
+								$data['saldo_kredit'] -= $jlh_dibayar_bfr;
+								if ($data['saldo_kredit'] < 0)
+								{
+									$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+									$data['saldo_kredit'] = 0;
+								}
+							}
+							else
+								$data['saldo_debit'] += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, $data);
+						}
+					}
+					else
+					{
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
+						$id = -1;
+						if (!isset($last_row))
+							$id = 1;
+						else
+							$id = $last_row->id_buku_besar;
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar >' => $id, 'tgl' => $tanggal_aft]);
+						foreach ($check_buku_besar as $row)
+						{
+							$data = [];
+							$data['saldo_kredit'] 	= $row->saldo_kredit;
+							$data['saldo_debit']	= $row->saldo_debit;
+							if ($row->saldo_kredit > 0)
+							{
+								$data['saldo_kredit'] -= $jlh_dibayar_bfr;
+								if ($data['saldo_kredit'] < 0)
+								{
+									$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+									$data['saldo_kredit'] = 0;
+								}
+							}
+							else
+								$data['saldo_debit'] += $jlh_dibayar_bfr;
+
+							$this->buku_besar_m->update($row->id_buku_besar, $data);
+						}
+
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
+						if (isset($last_row))
+						{
+							$saldo_debit 	= 0;
+							$saldo_kredit 	= 0;
+							if ($last_row->saldo_kredit > 0)
+							{
+								$saldo_kredit = $last_row->saldo_kredit - $jlh_dibayar_aft;
+								if ($saldo_kredit < 0)
+								{
+									$saldo_debit = $saldo_kredit * (-1);
+									$saldo_kredit = 0;
+								}
+							}
+							else
+								$saldo_debit = $last_row->saldo_debit + $jlh_dibayar_aft;
+
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $saldo_debit,
+								'saldo_kredit'	=> $saldo_kredit,
+								'id_aktivitas'	=> 3
+							];
+						}
+						else
+						{
+							$this->data['entri'] = [
+								'tgl'			=> $tanggal_aft,
+								'ket'			=> 'Angsuran',
+								'ref'			=> '106',
+								'debit'			=> $jlh_dibayar_aft,
+								'kredit'		=> 0,
+								'saldo_debit'	=> $jlh_dibayar_aft,
+								'saldo_kredit'	=> 0,
+								'id_aktivitas'	=> 3
+							];
+						}
+						$this->buku_besar_m->insert($this->data['entri']);
+						$id_buku_besar = $this->db->insert_id();
+					}
+				}
+				else if ($jlh_dibayar_aft > $jlh_dibayar_bfr)
+				{
+					// case 3
+					$check_jurnal_umum = $this->jurnal_umum_m->get_row(['tgl' => $tanggal_bfr, 'id_aktivitas' => 3]);
+					$this->jurnal_umum_m->update($check_jurnal_umum->id_jurnal, [
+						'debit'	=> $check_jurnal_umum->debit + ($jlh_dibayar_aft - $jlh_dibayar_bfr)
+					]);
+
+					$data = [];
+					$data['debit']			= $check_buku_besar_bfr->debit + ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+					$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+					$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
+					if ($data['saldo_kredit'] > 0)
+					{
+						$data['saldo_kredit'] -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+						if ($data['saldo_kredit'] < 0)
+						{
+							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+							$data['saldo_kredit'] = 0;
+						}
+					}
+					else
+						$data['saldo_debit'] += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+
+					$this->buku_besar_m->update($check_buku_besar_bfr->id_buku_besar, $data);
+
+					$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar >' => $check_buku_besar_bfr->id_buku_besar, 'tgl' => $tanggal_bfr]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_kredit > 0)
+						{
+							$row->saldo_kredit -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+							if ($row->saldo_kredit < 0)
+							{
+								$row->saldo_debit = $row->saldo_kredit * (-1);
+								$row->saldo_kredit = 0;
+							}
+						}
+						else
+							$row->saldo_debit += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_debit'	=> $row->saldo_debit,
+							'saldo_kredit'	=> $row->saldo_kredit
+						]);
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal_bfr]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_kredit > 0)
+						{
+							$row->saldo_kredit -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+							if ($row->saldo_kredit < 0)
+							{
+								$row->saldo_debit = $row->saldo_kredit * (-1);
+								$row->saldo_kredit = 0;
+							}
+						}
+						else
+							$row->saldo_debit += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_debit'	=> $row->saldo_debit,
+							'saldo_kredit'	=> $row->saldo_kredit
+						]);
+					}
+				}
+				else
+				{
+					// case 4
+					$check_jurnal_umum = $this->jurnal_umum_m->get_row(['tgl' => $tanggal_bfr, 'id_aktivitas' => 3]);
+					$debit = $check_jurnal_umum->debit + ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+					if ($debit <= 0)
+						$this->jurnal_umum_m->delete($check_jurnal_umum->id_jurnal);
+					else
+						$this->jurnal_umum_m->update($check_jurnal_umum->id_jurnal, [
+							'debit'	=> $check_jurnal_umum->debit + ($jlh_dibayar_aft - $jlh_dibayar_bfr)
+						]);
+
+					$data = [];
+					$data['debit']			= $check_buku_besar_bfr->debit + ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+					$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+					$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
+					if ($data['saldo_kredit'] > 0)
+					{
+						$data['saldo_kredit'] -= ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+						if ($data['saldo_kredit'] < 0)
+						{
+							$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+							$data['saldo_kredit'] = 0;
+						}
+					}
+					else
+						$data['saldo_debit'] += ($jlh_dibayar_aft - $jlh_dibayar_bfr);
+
+					if ($data['debit'] <= 0)
+						$this->buku_besar_m->delete($check_buku_besar_bfr->id_buku_besar);
+					else
+						$this->buku_besar_m->update($check_buku_besar_bfr->id_buku_besar, $data);
+
+					$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 3, 'id_buku_besar >' => $check_buku_besar_bfr->id_buku_besar, 'tgl' => $tanggal_bfr]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_debit > 0)
+						{
+							$row->saldo_debit -= ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+							if ($row->saldo_debit < 0)
+							{
+								$row->saldo_kredit = $row->saldo_debit * (-1);
+								$row->saldo_debit = 0;
+							}
+						}
+						else
+							$row->saldo_kredit += ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_debit'	=> $row->saldo_debit,
+							'saldo_kredit'	=> $row->saldo_kredit
+						]);
+					}
+
+					$check_buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal_bfr]);
+					foreach ($check_buku_besar as $row)
+					{
+						if ($row->saldo_debit > 0)
+						{
+							$row->saldo_debit -= ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+							if ($row->saldo_debit < 0)
+							{
+								$row->saldo_kredit = $row->saldo_debit * (-1);
+								$row->saldo_debit = 0;
+							}
+						}
+						else
+							$row->saldo_kredit += ($jlh_dibayar_bfr - $jlh_dibayar_aft);
+
+						$this->buku_besar_m->update($row->id_buku_besar, [
+							'saldo_debit'	=> $row->saldo_debit,
+							'saldo_kredit'	=> $row->saldo_kredit
+						]);
+					}
+				}
+
+			}
+
 
 			$this->flashmsg('Data angsuran berhasil diperbarui');
 			redirect('admin/data_angsuran');
@@ -1155,7 +3338,98 @@ class Admin extends MY_Controller{
 
 		if ($this->POST('delete') && $this->POST('id_angsuran'))
 		{
+			$angsuran_bfr = $this->angsuran_m->get_row(['id_angsuran' => $this->POST('id_angsuran')]);
 			$this->angsuran_m->delete($this->POST('id_angsuran'));
+			$tanggal = $angsuran_bfr->tgl_angsuran;
+
+			$this->load->model('jurnal_umum_m');
+			$check_jurnal_umum = $this->jurnal_umum_m->get(['tgl' => $tanggal]);
+			foreach ($check_jurnal_umum as $row)
+			{
+				$row->debit -= $angsuran_bfr->jlh_dibayar;
+
+				if ($row->debit <= 0)
+					$this->jurnal_umum_m->delete_by(['id_jurnal' => $row->id_jurnal]);
+				else
+					$this->jurnal_umum_m->update($row->id_jurnal, [
+						'debit'	=> $row->debit
+					]);
+			}
+			
+			$debit = $angsuran_bfr->jlh_dibayar;
+			
+			$this->load->model('buku_besar_m');
+			$buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal, 'id_aktivitas' => 3]);
+			$buku_besar->debit -= $angsuran_bfr->jlh_dibayar;
+			if ($buku_besar->debit <= 0)
+				$this->buku_besar_m->delete($buku_besar->id_buku_besar);
+			else
+			{
+				if ($buku_besar->saldo_kredit > 0)
+					$buku_besar->saldo_kredit += $angsuran_bfr->jlh_dibayar;
+				else
+				{
+					$buku_besar->saldo_debit -= $angsuran_bfr->jlh_dibayar;
+					if ($buku_besar->saldo_debit < 0)
+					{
+						$buku_besar->saldo_kredit = $buku_besar->saldo_debit * (-1);
+						$buku_besar->saldo_debit = 0;
+					}
+				}
+
+				$this->buku_besar_m->update($buku_besar->id_buku_besar, [
+					'debit'			=> $buku_besar->debit,
+					'saldo_debit'	=> $buku_besar->saldo_debit,
+					'saldo_kredit'	=> $buku_besar->saldo_kredit
+				]);
+			}
+
+			$buku_besar_s = $this->buku_besar_m->get(['tgl' => $tanggal, 'id_aktivitas !=' => 3]);
+			
+			foreach ($buku_besar_s as $buku_besar)
+			{
+				if ($buku_besar->saldo_debit > 0)
+				{
+					$buku_besar->saldo_debit -= $angsuran_bfr->jlh_dibayar;
+					if ($buku_besar->saldo_debit < 0)
+					{
+						$buku_besar->saldo_kredit = $buku_besar->saldo_debit * (-1);
+						$buku_besar->saldo_debit = 0;
+					}
+				}
+				else
+				{
+					$buku_besar->saldo_kredit += $angsuran_bfr->jlh_dibayar;
+				}
+
+				$this->buku_besar_m->update($buku_besar->id_buku_besar, [
+					'saldo_debit'	=> $buku_besar->saldo_debit,
+					'saldo_kredit'	=> $buku_besar->saldo_kredit
+				]);
+			}
+
+			$buku_besar = $this->buku_besar_m->get(['tgl >' => $tanggal]);
+			foreach ($buku_besar as $row)
+			{
+				if ($row->saldo_debit > 0)
+				{
+					$row->saldo_debit -= $angsuran_bfr->jlh_dibayar;
+					if ($row->saldo_debit < 0)
+					{
+						$row->saldo_kredit = $row->saldo_debit * (-1);
+						$row->saldo_debit = 0;
+					}
+				}
+				else
+				{
+					$row->saldo_kredit += $angsuran_bfr->jlh_dibayar;
+				}
+
+				$this->buku_besar_m->update($row->id_buku_besar, [
+					'saldo_debit'	=> $row->saldo_debit,
+					'saldo_kredit'	=> $row->saldo_kredit
+				]);
+			}
 			exit;
 		}
 

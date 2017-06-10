@@ -179,6 +179,9 @@
                 },
                 success: function() {
                     window.location = '<?= base_url('admin/data_pinjaman') ?>';
+                },
+                error: function(err) {
+                    console.log(err.responseText);
                 }
             });   
         }

@@ -81,7 +81,7 @@ class Ketua_koperasi extends MY_Controller{
 	public function data_bukuBesar(){
 		$this->data['title'] 	= "Buku Besar | KOHIWAS";
 		$this->data['content']	= "ketua_koperasi/buku_besar";
-		$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('id_buku_besar', 'DESC');
+		$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('tgl', 'ASC');
 		$this->template($this->data);	
 	}
 
