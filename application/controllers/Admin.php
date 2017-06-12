@@ -421,7 +421,7 @@ class Admin extends MY_Controller{
 				$check_jurnal_umum_bfr = $this->jurnal_umum_m->get_row(['tgl' => $tanggal_bfr, 'id_aktivitas' => 1]);
 				if (isset($check_jurnal_umum_bfr))
 				{
-					$debit = $check_jurnal_umum_bfr->debit - $simpanan_wajib_aft;
+					$debit = $check_jurnal_umum_bfr->debit - $simpanan_wajib_bfr;
 					if ($debit <= 0)
 						$this->jurnal_umum_m->delete($check_jurnal_umum_bfr->id_jurnal);
 					else
@@ -461,7 +461,7 @@ class Admin extends MY_Controller{
 				$check_jurnal_umum_bfr = $this->jurnal_umum_m->get_row(['tgl' => $tanggal_bfr, 'id_aktivitas' => 4]);
 				if (isset($check_jurnal_umum_bfr))
 				{
-					$debit = $check_jurnal_umum_bfr->debit - $simpanan_sukarela_aft;
+					$debit = $check_jurnal_umum_bfr->debit - $simpanan_sukarela_bfr;
 					if ($debit <= 0)
 						$this->jurnal_umum_m->delete($check_jurnal_umum_bfr->id_jurnal);
 					else
@@ -623,13 +623,13 @@ class Admin extends MY_Controller{
 					}
 					else
 					{
-						$last_row = $this->buku_besar_m->get_last_row();
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 						$id = -1;
 						if (!isset($last_row))
 							$id = 1;
 						else
 							$id = $last_row->id_buku_besar;
-						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 1, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 1, 'id_buku_besar <=' => $id, 'tgl' => $tanggal_aft]);
 						foreach ($check_buku_besar as $row)
 						{
 							if ($row->saldo_debit > 0)
@@ -665,7 +665,7 @@ class Admin extends MY_Controller{
 								}
 							}
 							else
-								$saldo_debit = $last_row->saldo_kredit + $simpanan_wajib_aft;
+								$saldo_debit = $last_row->saldo_debit + $simpanan_wajib_aft;
 
 							$this->data['entri'] = [
 								'tgl'			=> $tanggal_aft,
@@ -866,13 +866,13 @@ class Admin extends MY_Controller{
 							}
 							else
 							{
-								$last_row = $this->buku_besar_m->get_last_row();
+								$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 								$id = -1;
 								if (!isset($last_row))
 									$id = 1;
 								else
 									$id = $last_row->id_buku_besar;
-								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <=' => $id, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
 									if ($row->saldo_debit > 0)
@@ -908,7 +908,7 @@ class Admin extends MY_Controller{
 										}
 									}
 									else
-										$saldo_debit = $last_row->saldo_kredit + $simpanan_sukarela_aft;
+										$saldo_debit = $last_row->saldo_debit + $simpanan_sukarela_aft;
 
 									$this->data['entri'] = [
 										'tgl'			=> $tanggal_aft,
@@ -1060,12 +1060,6 @@ class Admin extends MY_Controller{
 							$id_buku_besar = -1;
 							if (isset($check_buku_besar))
 							{
-								// $last_row = $this->buku_besar_m->get_last_row();
-								// $id = -1;
-								// if (!isset($last_row))
-								// 	$id = 1;
-								// else
-								// 	$id = $last_row->id_buku_besar;
 								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
@@ -1109,13 +1103,13 @@ class Admin extends MY_Controller{
 							}
 							else
 							{
-								$last_row = $this->buku_besar_m->get_last_row();
+								$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 								$id = -1;
 								if (!isset($last_row))
 									$id = 1;
 								else
 									$id = $last_row->id_buku_besar;
-								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <=' => $id, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
 									if ($row->saldo_debit > 0)
@@ -1314,50 +1308,47 @@ class Admin extends MY_Controller{
 						$id_buku_besar = -1;
 						if (isset($check_buku_besar))
 						{
-							$last_row = $this->buku_besar_m->get_last_row(['tgl <' => $tanggal_aft], 'tgl');
-
-							if ($last_row->saldo_kredit > 0)
-							{
-								$last_row->saldo_kredit -= $simpanan_sukarela_aft;
-								if ($last_row->saldo_kredit < 0)
-								{
-									$last_row->saldo_debit = $last_row->saldo_kredit * (-1);
-									$last_row->saldo_kredit = 0;	
-								}
-							}
-							else
-								$last_row->saldo_debit += $simpanan_sukarela_aft;
-
-							$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 4]);
-
-							if ($last_row->saldo_kredit > 0)
-							{
-								$last_row->saldo_kredit -= $check_buku_besar->debit;
-								if ($last_row->saldo_kredit < 0)
-								{
-									$last_row->saldo_debit = $last_row->saldo_kredit * (-1);
-									$last_row->saldo_kredit = 0;	
-								}
-							}
-							else
-								$last_row->saldo_debit += $check_buku_besar->debit;
-
 							$this->buku_besar_m->update($check_buku_besar->id_buku_besar, [
-								'debit'			=> $check_buku_besar->debit + $simpanan_sukarela_aft,
-								'saldo_debit'	=> $last_row->saldo_debit,
-								'saldo_kredit'	=> $last_row->saldo_kredit
+								'debit'			=> $check_buku_besar->debit + $simpanan_sukarela_aft
 							]);
 							$id_buku_besar = $check_buku_besar->id_buku_besar;
+							$check_buku_besar_bfr = $this->buku_besar_m->get([
+								'tgl'				=> $tanggal_aft,
+								'id_aktivitas !='	=> 4,
+								'id_buku_besar <'	=> $id_buku_besar
+							]);
+							if (isset($check_buku_besar_bfr))
+							{
+								foreach ($check_buku_besar_bfr as $row)
+								{
+									$data = [];
+									$data['saldo_debit']	= $row->saldo_debit;
+									$data['saldo_kredit']	= $row->saldo_kredit;
+									if ($row->saldo_debit > 0)
+									{
+										$data['saldo_debit'] -= $simpanan_sukarela_bfr;
+										if ($data['saldo_debit'] < 0)
+										{
+											$data['saldo_kredit'] = $data['saldo_debit'] * (-1);
+											$data['saldo_debit'] = 0;
+										}
+									}
+									else
+										$data['saldo_kredit'] += $simpanan_sukarela_bfr;
+
+									$this->buku_besar_m->update($row->id_buku_besar, $data);
+								}
+							}
 						}
 						else
 						{
-							$last_row = $this->buku_besar_m->get_last_row();
+							$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 							$id = -1;
 							if (!isset($last_row))
 								$id = 1;
 							else
 								$id = $last_row->id_buku_besar;
-							$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+							$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <=' => $id, 'tgl' => $tanggal_aft]);
 							foreach ($check_buku_besar as $row)
 							{
 								if ($row->saldo_debit > 0)
@@ -1504,12 +1495,6 @@ class Admin extends MY_Controller{
 					$id_buku_besar = -1;
 					if (isset($check_buku_besar))
 					{
-						// $last_row = $this->buku_besar_m->get_last_row();
-						// $id = -1;
-						// if (!isset($last_row))
-						// 	$id = 1;
-						// else
-						// 	$id = $last_row->id_buku_besar;
 						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 1, 'id_buku_besar <' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 						foreach ($check_buku_besar as $row)
 						{
@@ -1553,13 +1538,13 @@ class Admin extends MY_Controller{
 					}
 					else
 					{
-						$last_row = $this->buku_besar_m->get_last_row();
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 						$id = -1;
 						if (!isset($last_row))
 							$id = 1;
 						else
 							$id = $last_row->id_buku_besar;
-						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 1, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 1, 'id_buku_besar <=' => $id, 'tgl' => $tanggal_aft]);
 						foreach ($check_buku_besar as $row)
 						{
 							if ($row->saldo_debit > 0)
@@ -1796,13 +1781,13 @@ class Admin extends MY_Controller{
 							}
 							else
 							{
-								$last_row = $this->buku_besar_m->get_last_row();
+								$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 								$id = -1;
 								if (!isset($last_row))
 									$id = 1;
 								else
 									$id = $last_row->id_buku_besar;
-								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <=' => $id, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
 									if ($row->saldo_debit > 0)
@@ -1838,7 +1823,7 @@ class Admin extends MY_Controller{
 										}
 									}
 									else
-										$saldo_debit = $last_row->saldo_kredit + $simpanan_sukarela_aft;
+										$saldo_debit = $last_row->saldo_debit + $simpanan_sukarela_aft;
 
 									$this->data['entri'] = [
 										'tgl'			=> $tanggal_aft,
@@ -1990,12 +1975,6 @@ class Admin extends MY_Controller{
 							$id_buku_besar = -1;
 							if (isset($check_buku_besar))
 							{
-								// $last_row = $this->buku_besar_m->get_last_row();
-								// $id = -1;
-								// if (!isset($last_row))
-								// 	$id = 1;
-								// else
-								// 	$id = $last_row->id_buku_besar;
 								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
@@ -2039,13 +2018,13 @@ class Admin extends MY_Controller{
 							}
 							else
 							{
-								$last_row = $this->buku_besar_m->get_last_row();
+								$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 								$id = -1;
 								if (!isset($last_row))
 									$id = 1;
 								else
 									$id = $last_row->id_buku_besar;
-								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <=' => $id, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
 									if ($row->saldo_debit > 0)
@@ -2244,50 +2223,71 @@ class Admin extends MY_Controller{
 						$id_buku_besar = -1;
 						if (isset($check_buku_besar))
 						{
-							$last_row = $this->buku_besar_m->get_last_row(['tgl <' => $tanggal_aft], 'tgl');
+							// $last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft, 'id_aktivitas !=' => 4], 'tgl');
 
-							if ($last_row->saldo_kredit > 0)
-							{
-								$last_row->saldo_kredit -= $simpanan_sukarela_aft;
-								if ($last_row->saldo_kredit < 0)
-								{
-									$last_row->saldo_debit = $last_row->saldo_kredit * (-1);
-									$last_row->saldo_kredit = 0;	
-								}
-							}
-							else
-								$last_row->saldo_debit += $simpanan_sukarela_aft;
+							// if ($last_row->saldo_kredit > 0)
+							// {
+							// 	$last_row->saldo_kredit -= $simpanan_sukarela_aft;
+							// 	if ($last_row->saldo_kredit < 0)
+							// 	{
+							// 		$last_row->saldo_debit = $last_row->saldo_kredit * (-1);
+							// 		$last_row->saldo_kredit = 0;	
+							// 	}
+							// }
+							// else
+							// 	$last_row->saldo_debit += $simpanan_sukarela_aft;
 
-							$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 4]);
+							// $check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_aft, 'id_aktivitas' => 4]);
 
-							if ($last_row->saldo_kredit > 0)
-							{
-								$last_row->saldo_kredit -= $check_buku_besar->debit;
-								if ($last_row->saldo_kredit < 0)
-								{
-									$last_row->saldo_debit = $last_row->saldo_kredit * (-1);
-									$last_row->saldo_kredit = 0;	
-								}
-							}
-							else
-								$last_row->saldo_debit += $check_buku_besar->debit;
+							// if ($last_row->saldo_kredit > 0)
+							// {
+							// 	$last_row->saldo_kredit -= $check_buku_besar->debit;
+							// 	if ($last_row->saldo_kredit < 0)
+							// 	{
+							// 		$last_row->saldo_debit = $last_row->saldo_kredit * (-1);
+							// 		$last_row->saldo_kredit = 0;	
+							// 	}
+							// }
+							// else
+							// 	$last_row->saldo_debit += $check_buku_besar->debit;
 
 							$this->buku_besar_m->update($check_buku_besar->id_buku_besar, [
 								'debit'			=> $check_buku_besar->debit + $simpanan_sukarela_aft,
-								'saldo_debit'	=> $last_row->saldo_debit,
-								'saldo_kredit'	=> $last_row->saldo_kredit
+								// 'saldo_debit'	=> $last_row->saldo_debit,
+								// 'saldo_kredit'	=> $last_row->saldo_kredit
 							]);
 							$id_buku_besar = $check_buku_besar->id_buku_besar;
+
+							$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $id_buku_besar, 'tgl' => $tanggal_aft]);
+							foreach ($check_buku_besar as $row)
+							{
+								if ($row->saldo_debit > 0)
+								{
+									$row->saldo_debit -= $simpanan_sukarela_bfr;
+									if ($row->saldo_debit < 0)
+									{
+										$row->saldo_kredit = $row->saldo_debit * (-1);
+										$row->saldo_debit = 0;
+									}
+								}
+								else
+									$row->saldo_kredit += $simpanan_sukarela_bfr;
+
+								$this->buku_besar_m->update($row->id_buku_besar, [
+									'saldo_kredit'	=> $row->saldo_kredit,
+									'saldo_debit'	=> $row->saldo_debit
+								]);
+							}
 						}
 						else
 						{
-							$last_row = $this->buku_besar_m->get_last_row();
+							$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 							$id = -1;
 							if (!isset($last_row))
 								$id = 1;
 							else
 								$id = $last_row->id_buku_besar;
-							$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <' => $id, 'tgl' => $tanggal_aft]);
+							$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar <=' => $id, 'tgl' => $tanggal_aft]);
 							foreach ($check_buku_besar as $row)
 							{
 								if ($row->saldo_debit > 0)
@@ -2433,12 +2433,6 @@ class Admin extends MY_Controller{
 					$id_buku_besar = -1;
 					if (isset($check_buku_besar))
 					{
-						// $last_row = $this->buku_besar_m->get_last_row();
-						// $id = -1;
-						// if (!isset($last_row))
-						// 	$id = 1;
-						// else
-						// 	$id = $last_row->id_buku_besar;
 						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 1, 'id_buku_besar >' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 						foreach ($check_buku_besar as $row)
 						{
@@ -2483,7 +2477,7 @@ class Admin extends MY_Controller{
 					}
 					else
 					{
-						$last_row = $this->buku_besar_m->get_last_row();
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 						$id = -1;
 						if (!isset($last_row))
 							$id = 1;
@@ -2555,7 +2549,10 @@ class Admin extends MY_Controller{
 						$id_buku_besar = $this->db->insert_id();
 					}
 
-					$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_bfr, 'id_buku_besar >' => $id_buku_besar, 'id_aktivitas !=' => 1]);
+					$check_buku_besar = $this->buku_besar_m->get_row(['tgl' => $tanggal_bfr, 'id_aktivitas' => 1]);
+					if (!isset($check_buku_besar))
+						$check_buku_besar = $this->buku_besar_m->get_last_row(['tgl' => $tanggal_bfr]);
+					$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_bfr, 'id_buku_besar >' => $check_buku_besar->id_buku_besar, 'id_aktivitas !=' => 1]);
 					foreach ($check_buku_besar as $row)
 					{
 						if ($row->saldo_kredit > 0)
@@ -2684,12 +2681,6 @@ class Admin extends MY_Controller{
 							$id_buku_besar = -1;
 							if (isset($check_buku_besar))
 							{
-								// $last_row = $this->buku_besar_m->get_last_row();
-								// $id = -1;
-								// if (!isset($last_row))
-								// 	$id = 1;
-								// else
-								// 	$id = $last_row->id_buku_besar;
 								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar >' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
@@ -2734,7 +2725,7 @@ class Admin extends MY_Controller{
 							}
 							else
 							{
-								$last_row = $this->buku_besar_m->get_last_row();
+								$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 								$id = -1;
 								if (!isset($last_row))
 									$id = 1;
@@ -2927,11 +2918,6 @@ class Admin extends MY_Controller{
 							$id_buku_besar = -1;
 							if (isset($check_buku_besar))
 							{
-								// $last_row = $this->buku_besar_m->get_last_row();
-								// if (!isset($last_row))
-								// 	$id_buku_besar = 1;
-								// else
-								// 	$id_buku_besar = $last_row->id_buku_besar;
 								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar >' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
@@ -2976,7 +2962,7 @@ class Admin extends MY_Controller{
 							}
 							else
 							{
-								$last_row = $this->buku_besar_m->get_last_row();
+								$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 								if (!isset($last_row))
 									$id_buku_besar = 1;
 								else
@@ -3285,6 +3271,7 @@ class Admin extends MY_Controller{
 					$data['debit'] 			= $check_buku_besar_bfr->debit - $simpanan_wajib_bfr;
 					$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
 					$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+					$temp_id = $check_buku_besar_bfr->id_buku_besar;
 					if ($check_buku_besar_bfr->saldo_debit > 0)
 					{
 						$data['saldo_debit'] -= ($simpanan_wajib_bfr - $simpanan_wajib_aft);
@@ -3357,11 +3344,6 @@ class Admin extends MY_Controller{
 					$id_buku_besar = -1;
 					if (isset($check_buku_besar))
 					{
-						// $last_row = $this->buku_besar_m->get_last_row();
-						// if (!isset($last_row))
-						// 	$id_buku_besar = 1;
-						// else
-						// 	$id_buku_besar = $last_row->id_buku_besar;
 						$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 1, 'id_buku_besar >' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 						foreach ($check_buku_besar as $row)
 						{
@@ -3406,7 +3388,7 @@ class Admin extends MY_Controller{
 					}
 					else
 					{
-						$last_row = $this->buku_besar_m->get_last_row();
+						$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 						if (!isset($last_row))
 							$id_buku_besar = 1;
 						else
@@ -3481,7 +3463,9 @@ class Admin extends MY_Controller{
 						'tgl'			=> $tanggal_bfr,
 						'id_aktivitas'	=> 1
 					]);
-					$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_bfr, 'id_aktivitas !=' => 1, 'id_buku_besar >' => $id_buku_besar]);
+					if (!isset($check_buku_besar_bfr))
+						$check_buku_besar_bfr = $this->buku_besar_m->get_last_row(['tgl' => $tanggal_bfr, 'id_buku_besar <' => $temp_id]);
+					$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_bfr, 'id_aktivitas !=' => 1, 'id_buku_besar >' => $check_buku_besar_bfr->id_buku_besar]);
 					foreach ($check_buku_besar as $row)
 					{
 						if ($row->saldo_debit > 0)
@@ -3538,6 +3522,7 @@ class Admin extends MY_Controller{
 							$data['debit'] 			= $check_buku_besar_bfr->debit - $simpanan_sukarela_bfr;
 							$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
 							$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
+							$temp_id = $check_buku_besar_bfr->id_buku_besar;
 							if ($check_buku_besar_bfr->saldo_kredit > 0)
 							{
 								$data['saldo_kredit'] -= ($simpanan_sukarela_aft - $simpanan_sukarela_bfr);
@@ -3610,12 +3595,6 @@ class Admin extends MY_Controller{
 							$id_buku_besar = -1;
 							if (isset($check_buku_besar))
 							{
-								// $last_row = $this->buku_besar_m->get_last_row();
-								// $id = -1;
-								// if (!isset($last_row))
-								// 	$id = 1;
-								// else
-								// 	$id = $last_row->id_buku_besar;
 								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar >' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
@@ -3660,7 +3639,7 @@ class Admin extends MY_Controller{
 							}
 							else
 							{
-								$last_row = $this->buku_besar_m->get_last_row();
+								$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 								$id = -1;
 								if (!isset($last_row))
 									$id = 1;
@@ -3732,7 +3711,7 @@ class Admin extends MY_Controller{
 								$id_buku_besar = $this->db->insert_id();
 							}
 
-							$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_bfr, 'id_buku_besar >' => $id_buku_besar, 'id_aktivitas !=' => 4]);
+							$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_bfr, 'id_buku_besar >' => $temp_id, 'id_aktivitas !=' => 4]);
 							foreach ($check_buku_besar as $row)
 							{
 								if ($row->saldo_kredit > 0)
@@ -3781,6 +3760,7 @@ class Admin extends MY_Controller{
 							$data['debit'] 			= $check_buku_besar_bfr->debit - $simpanan_sukarela_bfr;
 							$data['saldo_kredit']	= $check_buku_besar_bfr->saldo_kredit;
 							$data['saldo_debit']	= $check_buku_besar_bfr->saldo_debit;
+							$temp_id = $check_buku_besar_bfr->id_buku_besar;
 							if ($check_buku_besar_bfr->saldo_debit > 0)
 							{
 								$data['saldo_debit'] -= ($simpanan_sukarela_bfr - $simpanan_sukarela_aft);
@@ -3853,11 +3833,6 @@ class Admin extends MY_Controller{
 							$id_buku_besar = -1;
 							if (isset($check_buku_besar))
 							{
-								// $last_row = $this->buku_besar_m->get_last_row();
-								// if (!isset($last_row))
-								// 	$id_buku_besar = 1;
-								// else
-								// 	$id_buku_besar = $last_row->id_buku_besar;
 								$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar >' => $check_buku_besar->id_buku_besar, 'tgl' => $tanggal_aft]);
 								foreach ($check_buku_besar as $row)
 								{
@@ -3902,7 +3877,7 @@ class Admin extends MY_Controller{
 							}
 							else
 							{
-								$last_row = $this->buku_besar_m->get_last_row();
+								$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 								if (!isset($last_row))
 									$id_buku_besar = 1;
 								else
@@ -3973,11 +3948,7 @@ class Admin extends MY_Controller{
 								$id_buku_besar = $this->db->insert_id();
 							}
 
-							$check_buku_besar_bfr = $this->buku_besar_m->get_row([
-								'tgl'			=> $tanggal_bfr,
-								'id_aktivitas'	=> 4
-							]);
-							$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_bfr, 'id_aktivitas !=' => 4, 'id_buku_besar >' => $id_buku_besar]);
+							$check_buku_besar = $this->buku_besar_m->get(['tgl' => $tanggal_bfr, 'id_aktivitas !=' => 4, 'id_buku_besar >' => $temp_id]);
 							foreach ($check_buku_besar as $row)
 							{
 								if ($row->saldo_debit > 0)
@@ -4131,33 +4102,12 @@ class Admin extends MY_Controller{
 						}
 						else
 						{
-							$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
-							$id = -1;
-							if (!isset($last_row))
-								$id = 1;
-							else
-								$id = $last_row->id_buku_besar;
-							$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar >' => $id, 'tgl' => $tanggal_aft]);
-							foreach ($check_buku_besar as $row)
-							{
-								$data = [];
-								$data['saldo_kredit'] 	= $row->saldo_kredit;
-								$data['saldo_debit']	= $row->saldo_debit;
-								if ($row->saldo_kredit > 0)
-								{
-									$data['saldo_kredit'] -= $simpanan_sukarela_bfr;
-									if ($data['saldo_kredit'] < 0)
-									{
-										$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
-										$data['saldo_kredit'] = 0;
-									}
-								}
-								else
-									$data['saldo_debit'] += $simpanan_sukarela_bfr;
-
-								$this->buku_besar_m->update($row->id_buku_besar, $data);
-							}
-
+							// $last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
+							// $id = -1;
+							// if (!isset($last_row))
+							// 	$id = 1;
+							// else
+							// 	$id = $last_row->id_buku_besar;
 							$last_row = $this->buku_besar_m->get_last_row(['tgl <=' => $tanggal_aft], 'tgl');
 							if (isset($last_row))
 							{
@@ -4201,6 +4151,27 @@ class Admin extends MY_Controller{
 							}
 							$this->buku_besar_m->insert($this->data['entri']);
 							$id_buku_besar = $this->db->insert_id();
+
+							$check_buku_besar = $this->buku_besar_m->get(['id_aktivitas !=' => 4, 'id_buku_besar >' => $id_buku_besar, 'tgl' => $tanggal_aft]);
+							foreach ($check_buku_besar as $row)
+							{
+								$data = [];
+								$data['saldo_kredit'] 	= $row->saldo_kredit;
+								$data['saldo_debit']	= $row->saldo_debit;
+								if ($row->saldo_kredit > 0)
+								{
+									$data['saldo_kredit'] -= $simpanan_sukarela_bfr;
+									if ($data['saldo_kredit'] < 0)
+									{
+										$data['saldo_debit'] = $data['saldo_kredit'] * (-1);
+										$data['saldo_kredit'] = 0;
+									}
+								}
+								else
+									$data['saldo_debit'] += $simpanan_sukarela_bfr;
+
+								$this->buku_besar_m->update($row->id_buku_besar, $data);
+							}
 						}
 					}
 				}
@@ -5606,7 +5577,7 @@ class Admin extends MY_Controller{
 										}
 									}
 									else
-										$saldo_debit = $last_row->saldo_kredit + $simpanan_sukarela_aft;
+										$saldo_debit = $last_row->saldo_debit + $simpanan_sukarela_aft;
 
 									$this->data['entri'] = [
 										'tgl'			=> $tanggal_aft,
