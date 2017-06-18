@@ -32,8 +32,9 @@ class Login extends MY_Controller
 		if ($this->POST('login-submit'))
 		{
 			$this->data = [
-				'username'	=> $this->POST('username'),
-				'password'	=> md5($this->POST('password'))
+				// 'username'	=> $this->POST('username'),
+				'password'	=> md5($this->POST('password')),
+				'id_role'	=> $this->POST('role')
 			];
 
 			$this->login_m->login($this->data);
@@ -42,6 +43,8 @@ class Login extends MY_Controller
 			exit;
 		}
 
-		$this->load->view('home');
+		$this->load->model('role_m');
+		$this->data['role'] = $this->role_m->get();
+		$this->load->view('home', $this->data);
 	}
 }

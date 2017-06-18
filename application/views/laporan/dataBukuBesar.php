@@ -81,6 +81,11 @@
         </div>
         <div class="content" style="margin: 0 auto; width:100%;">
             <p style="margin-top: 50px; width: 100%; font-weight: bold; font-size: 18px; text-align: center; margin-bottom: 30px;">Buku Besar</p>
+            <?php if (!isset($periode)): ?>
+                <span><b>Periode: All</b></span>
+            <?php else: ?>
+                <span><b>Periode: <?= $periode['min'] . ' - ' . $periode['max'] ?></b></span>
+            <?php endif; ?>
             <table style="width: 100%;">
 				<tr>
 	                <th rowspan="2">Tanggal</th>
@@ -105,6 +110,12 @@
 	                <td><?= "Rp " . number_format($row->saldo_kredit,2,',','.') ?></td>
 	            </tr>
 	            <?php endforeach; ?>
+                <tr>
+                    <td><b>Total Saldo Debit</b></td>
+                    <td colspan="2"><?= "Rp " . number_format($total->total_saldo_debit,2,',','.') ?></td>
+                    <td><b>Total Saldo Kredit</b></td>
+                    <td colspan="2"><?= "Rp " . number_format($total->total_saldo_kredit,2,',','.') ?></td>
+                </tr>
 			</table>
 		</div>
 	</div>

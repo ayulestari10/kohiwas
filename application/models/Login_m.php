@@ -27,6 +27,7 @@ class Login_m extends MY_Model
 				'username'	=> $result->username,
 				'id_role'	=> $result->id_role
 			]);
+			
 			return TRUE;
 		}
 

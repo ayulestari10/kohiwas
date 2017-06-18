@@ -19,6 +19,16 @@ class Buku_besar_m extends MY_Model{
 
 		return $query->row();
 	}
+
+	public function total_debit_kredit($periode = [])
+	{
+		if (count($periode) <= 0)
+			$sql 	= 'SELECT SUM(saldo_debit) AS total_saldo_debit, SUM(saldo_kredit) AS total_saldo_kredit FROM buku_besar';
+		else
+			$sql	= 'SELECT SUM(saldo_debit) AS total_saldo_debit, SUM(saldo_kredit) AS total_saldo_kredit FROM buku_besar WHERE tgl >= "' . $periode['min'] . '" AND tgl <= "' . $periode['max'] . '"';
+		$query 	= $this->db->query($sql);
+		return $query->row();
+	}
 }
 
 ?>

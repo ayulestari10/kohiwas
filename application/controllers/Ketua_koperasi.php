@@ -74,14 +74,40 @@ class Ketua_koperasi extends MY_Controller{
 	public function data_jurnal(){
 		$this->data['title'] 		= "Jurnal Umum | KOHIWAS";
 		$this->data['content']		= "ketua_koperasi/jurnal";
-		$this->data['jurnal_umum']	= $this->jurnal_umum_m->get_by_order('id_jurnal', 'DESC');
+		if ($this->POST('periode'))
+		{
+			$periode = $this->POST('periode');
+			$this->data['total']		= $this->jurnal_umum_m->total_debit_kredit(['min' => $periode['min'], 'max' => $periode['max']]);
+			$this->data['jurnal_umum']	= $this->jurnal_umum_m->get_by_order('tgl', 'ASC', ['tgl >=' => $periode['min'], 'tgl <=' => $periode['max']]);
+			$this->data['periode'] = $periode;
+			$this->session->set_userdata(['periode' => $periode]);
+		}
+		else
+		{
+			$this->session->unset_userdata('periode');
+			$this->data['total']		= $this->jurnal_umum_m->total_debit_kredit();
+			$this->data['jurnal_umum']	= $this->jurnal_umum_m->get_by_order('tgl', 'ASC');
+		}
 		$this->template($this->data);	
 	}
 
 	public function data_bukuBesar(){
 		$this->data['title'] 	= "Buku Besar | KOHIWAS";
 		$this->data['content']	= "ketua_koperasi/buku_besar";
-		$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('tgl', 'ASC');
+		if ($this->POST('periode'))
+		{
+			$periode = $this->POST('periode');
+			$this->data['total']		= $this->buku_besar_m->total_debit_kredit(['min' => $periode['min'], 'max' => $periode['max']]);
+			$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('tgl', 'ASC', ['tgl >=' => $periode['min'], 'tgl <=' => $periode['max']]);
+			$this->data['periode'] = $periode;
+			$this->session->set_userdata(['periode' => $periode]);
+		}
+		else
+		{
+			$this->session->unset_userdata('periode');
+			$this->data['total']		= $this->buku_besar_m->total_debit_kredit();
+			$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('tgl', 'ASC');
+		}
 		$this->template($this->data);	
 	}
 
@@ -127,7 +153,18 @@ class Ketua_koperasi extends MY_Controller{
 	}
 
 	public function cetakJurnal(){
-		$this->data['jurnal_umum']	= $this->jurnal_umum_m->get_by_order('id_jurnal', 'DESC');
+		$periode = $this->session->userdata('periode');
+		if (isset($periode))
+		{
+			$this->data['periode']		= $periode;
+			$this->data['total']		= $this->jurnal_umum_m->total_debit_kredit(['min' => $periode['min'], 'max' => $periode['max']]);
+			$this->data['jurnal_umum']	= $this->jurnal_umum_m->get_by_order('tgl', 'ASC', ['tgl >=' => $periode['min'], 'tgl <=' => $periode['max']]);
+		}
+		else
+		{
+			$this->data['total']		= $this->jurnal_umum_m->total_debit_kredit();
+			$this->data['jurnal_umum']	= $this->jurnal_umum_m->get_by_order('tgl', 'ASC');
+		}
 
 		$html = $this->load->view('laporan/dataJurnalUmum', $this->data, true);
     	$pdfFilePath = 'Jurnal Umum.pdf';
@@ -137,7 +174,18 @@ class Ketua_koperasi extends MY_Controller{
 	}
 
 	public function cetakBukuBesar(){
-		$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('id_buku_besar', 'DESC');
+		$periode = $this->session->userdata('periode');
+		if (isset($periode))
+		{
+			$this->data['periode']		= $periode;
+			$this->data['total']		= $this->buku_besar_m->total_debit_kredit(['min' => $periode['min'], 'max' => $periode['max']]);
+			$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('tgl', 'ASC', ['tgl >=' => $periode['min'], 'tgl <=' => $periode['max']]);
+		}
+		else
+		{
+			$this->data['total']		= $this->buku_besar_m->total_debit_kredit();
+			$this->data['buku_besar']	= $this->buku_besar_m->get_by_order('tgl', 'ASC');
+		}
 
 		$html = $this->load->view('laporan/dataBukuBesar', $this->data, true);
     	$pdfFilePath = 'Buku Besar.pdf';

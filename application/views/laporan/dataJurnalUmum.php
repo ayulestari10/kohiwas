@@ -81,6 +81,11 @@
         </div>
         <div class="content" style="margin: 0 auto; width:100%;">
             <p style="margin-top: 50px; width: 100%; font-weight: bold; font-size: 18px; text-align: center; margin-bottom: 30px;">Laporan Data Anggota</p>
+            <?php if (!isset($periode)): ?>
+                <span><b>Periode: All</b></span>
+            <?php else: ?>
+                <span><b>Periode: <?= $periode['min'] . ' - ' . $periode['max'] ?></b></span>
+            <?php endif; ?>
             <table style="width: 100%;">
                 <thead>
                     <tr>
@@ -99,6 +104,12 @@
                         <td><?= "Rp " . number_format($row->kredit,2,',','.') ?></td>
                     </tr>
                     <?php endforeach; ?>
+                    <tr>
+                        <td><b>Total Debit</b></td>
+                        <td><?= "Rp " . number_format($total->total_debit,2,',','.') ?></td>
+                        <td><b>Total Kredit</b></td>
+                        <td><?= "Rp " . number_format($total->total_kredit,2,',','.') ?></td>
+                    </tr>
                 </tbody>
             </table>
         </div>

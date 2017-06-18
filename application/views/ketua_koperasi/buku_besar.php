@@ -1,7 +1,3 @@
-<style type="text/css">
-  table,th, td{text-align: center;border: 1px solid black;}
-
-</style>
 <!-- Content Header (Page header) -->
 <div class="container">
     <section class="content-header">
@@ -24,6 +20,36 @@
                             <style type="text/css">
                                 tr th, tr td {text-align: center;}
                             </style>
+                            <?php if (!isset($periode)): ?>
+                                <span><b>Periode: All</b></span>
+                            <?php else: ?>
+                                <span><b>Periode: <?= $periode['min'] . ' - ' . $periode['max'] ?></b></span>
+                            <?php endif; ?>
+                            <div class="periode-search row">
+                                <?= form_open('ketua_koperasi/data_bukuBesar') ?>
+                                <div class="col-md-3">
+                                    <label for="tgl">Dari</label>
+                                    <div class="input-group date">
+                                          <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                          <input type="text" name="periode[min]" id="tgl_dari" class="form-control" placeholder="YYYY-MM-DD" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="tgl">Sampai</label>
+                                    <div class="input-group date">
+                                          <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                          <input type="text" name="periode[max]" id="tgl_sampai" class="form-control" placeholder="YYYY-MM-DD" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label> </label>
+                                    <div class="form-group">
+                                        <input type="submit" class="btn btn-primary" name="filter" value="Filter">
+                                    </div>
+                                </div>
+                                <?= form_close() ?>
+                            </div>
+                            <br>
                             <b class="pull-left">Nama Akun: Kas</b>
                             <b class="pull-right">Kode Akun: 200</b>
                             <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-example">
@@ -52,6 +78,16 @@
                                 <?php endforeach; ?>
                             </table>
                             <!-- /.table-responsive -->
+                            <table class="table" style="width: 50%;">
+                                <tr>
+                                    <td><b>Total Saldo Debit</b></td>
+                                    <td><?= "Rp " . number_format($total->total_saldo_debit,2,',','.') ?></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Total Saldo Kredit</b></td>
+                                    <td><?= "Rp " . number_format($total->total_saldo_kredit,2,',','.') ?></td>
+                                </tr>
+                            </table>
                         </div>
                         <!-- /.panel-body -->
                     </div>
@@ -62,3 +98,9 @@
             <!-- /.row -->
 
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.input-group.date').datepicker({format: "yyyy-mm-dd"});
+    });
+</script>
